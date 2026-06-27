@@ -1,0 +1,75 @@
+:root {
+  /* PLACEHOLDER palette — finalize during the design brainstorm.
+     Leaning dark/luxe per the brief (discretion, expensive, 3D). */
+  --base: #0a0a0b; /* near-black base */
+  --ink: #f4f2ec; /* warm off-white text */
+  --muted: #8a877f; /* low-contrast secondary */
+  --accent: #b4965a; /* muted gold — single accent, used as light not fill */
+  --hairline: rgba(244, 242, 236, 0.12);
+
+  --measure: 64ch;
+  --gutter: clamp(1.25rem, 5vw, 6rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--base);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+/* hanging punctuation where supported */
+h1,
+h2,
+p {
+  hanging-punctuation: first last;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
