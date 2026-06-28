@@ -1,14 +1,34 @@
 :root {
-  /* PLACEHOLDER palette — finalize during the design brainstorm.
-     Leaning dark/luxe per the brief (discretion, expensive, 3D). */
-  --base: #0a0a0b; /* near-black base */
-  --ink: #f4f2ec; /* warm off-white text */
-  --muted: #8a877f; /* low-contrast secondary */
-  --accent: #b4965a; /* muted gold — single accent, used as light not fill */
-  --hairline: rgba(244, 242, 236, 0.12);
+  /* Locked art direction — luxe minimal, warm. Quiet money.
+     One accent (muted brass), used as light/small marks only — never a fill
+     behind text. Bone paper base, warm near-black ink. */
+  --base: #f3efe6; /* warm bone paper background */
+  --ink: #1a1714; /* warm near-black text (never pure black) */
+  --muted: #8a8275; /* taupe secondary text, kickers */
+  --accent: #a8843e; /* muted brass — light/small marks only */
+  --hairline: rgba(26, 23, 20, 0.14); /* rules, dividers, borders */
+  --cta-border: rgba(26, 23, 20, 0.32); /* CTA resting border — present but quiet (#4) */
 
-  --measure: 64ch;
-  --gutter: clamp(1.25rem, 5vw, 6rem);
+  --measure: 38ch; /* a narrow editorial measure */
+  --gutter: clamp(1.5rem, 6vw, 8rem);
+
+  /* ---- Type scale (F1) — explicit tiers so hierarchy is intentional ---- */
+  --step-display: clamp(3.5rem, 15vw, 13rem); /* hero masthead only — the one loud moment */
+  --step-lead: clamp(1.5rem, 1.1rem + 1.9vw, 2.6rem); /* .lead */
+  --step-sub: clamp(1.15rem, 1rem + 0.6vw, 1.4rem); /* third tier — between lead and body */
+  --step-body: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --footer-wordmark: clamp(1.4rem, 1.1rem + 1vw, 2.1rem); /* coda — quieter than the hero */
+
+  /* ---- Section rhythm (F2) — space as punctuation ---- */
+  --section-y: clamp(7rem, 18vh, 14rem); /* default */
+  --section-y-hold: clamp(4rem, 10vh, 8rem); /* tension — sections sit close */
+  --section-y-exhale: clamp(11rem, 26vh, 20rem); /* breath — sections open up */
+
+  /* ---- Custom cursor (F3) — consumed by the Cursor component (Phase 2) ---- */
+  --cursor-size: 6px; /* the 1:1 dot */
+  --cursor-ring: 34px; /* the lerping ring at rest */
+
+  --ease-luxe: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 *,
@@ -21,7 +41,24 @@
 
 html {
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Lenis carries the scroll; hide the native bar (F3 / #8). Content stays
+     fully scrollable via wheel, keyboard, and trackpad. */
+  scrollbar-width: none; /* Firefox */
+  /* Clip the decorative numeral bleed (#7) at the document root too — body's
+     overflow-x:hidden alone leaves <html> pannable ~20px horizontally. */
+  overflow-x: hidden;
+}
+
+html::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+/* The custom cursor (Phase 2) adds this class only on fine pointers without
+   reduced-motion; until then the native cursor is untouched. */
+body.has-cursor {
+  cursor: none;
 }
 
 body {
@@ -29,7 +66,8 @@ body {
   color: var(--ink);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-feature-settings: 'liga' 1, 'kern' 1;
-  line-height: 1.5;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -39,15 +77,18 @@ h2,
 h3 {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
+  font-optical-sizing: auto;
+  font-variation-settings: 'SOFT' 0, 'WONK' 0;
   text-wrap: balance;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
 }
 
 /* hanging punctuation where supported */
 h1,
 h2,
-p {
+p,
+blockquote {
   hanging-punctuation: first last;
 }
 
@@ -57,13 +98,535 @@ a {
 }
 
 :focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 3px;
+  outline: 1.5px solid var(--accent);
+  outline-offset: 4px;
 }
 
 ::selection {
+  background: rgba(168, 132, 62, 0.22);
+  color: var(--ink);
+}
+
+/* ---------- Editorial primitives ---------- */
+
+/* letterspaced small-caps kicker label, sits above headings */
+.kicker {
+  display: inline-block;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kicker::before {
+  content: '';
+  display: inline-block;
+  width: 1.75rem;
+  height: 1px;
+  margin-right: 0.85rem;
+  vertical-align: middle;
   background: var(--accent);
-  color: var(--base);
+  opacity: 0.8;
+}
+
+.measure {
+  max-width: var(--measure);
+}
+
+.hairline {
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+/* ---------- Persistent atmosphere ---------- */
+
+/* The WebGL "warm room" sits fixed behind the entire scroll, not just the hero,
+   so light and motes carry the full page. Content layers sit above it. */
+.site-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+main,
+.footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* section shell — vast vertical margins, content in a narrow offset measure.
+   --pad-y is the single knob both the padding AND the Roman numeral read from,
+   so the numeral stays pinned to the content top under every rhythm variant. */
+.section {
+  position: relative;
+  --pad-y: var(--section-y);
+  padding: var(--pad-y) var(--gutter);
+}
+
+/* Rhythm variants (F2) — space as punctuation. */
+.section--hold {
+  --pad-y: var(--section-y-hold);
+}
+
+.section--exhale {
+  --pad-y: var(--section-y-exhale);
+}
+
+/* oversized, ultra-light Roman numeral — one scale moment per section, set
+   faintly into the otherwise-empty right field */
+.section__index {
+  position: absolute;
+  top: var(--pad-y); /* tracks the section's own top padding (hold/exhale safe) */
+  /* peek from the right edge — a structural landmark, not a centred decoration.
+     A small negative offset lets the glyph bleed off; body{overflow-x:hidden}
+     clips it so no horizontal scroll is introduced. */
+  right: clamp(-1.5rem, -1.5vw, -0.5rem);
+  z-index: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 100;
+  font-size: clamp(6rem, 15vw, 15rem);
+  line-height: 0.78;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  opacity: 0.08; /* lifted from 0.05 — was below perception (#7) */
+  pointer-events: none;
+  user-select: none;
+}
+
+.section > *:not(.section__index) {
+  position: relative;
+  z-index: 1;
+}
+
+.lead {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 1.1rem + 1.9vw, 2.6rem);
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+/* third tier (F1) — between .lead and body; mid-weight display, calmer colour.
+   Consumed by the TheOneNumber triplet and similar in Phase 1. */
+.subhead {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 400;
+  font-size: var(--step-sub);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.body-copy {
+  color: var(--ink);
+  max-width: var(--measure);
+}
+
+.body-copy + .body-copy {
+  margin-top: 1.4rem;
+}
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--gutter);
+  padding-bottom: clamp(3rem, 12vh, 9rem);
+  overflow: hidden;
+}
+
+/* oversized ultra-light brand initial filling the hero's right half;
+   parallaxes on scroll (set inline by HeroMark) */
+.hero__mark {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero__mark span {
+  display: block;
+  margin-right: clamp(-2rem, 1vw, 4rem);
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 100;
+  font-size: clamp(18rem, 40vw, 52rem);
+  line-height: 0.7;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  opacity: 0.06;
+  user-select: none;
+  will-change: transform;
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  /* offset from the gutter — a lot of air around the masthead */
+  margin-left: clamp(0rem, 4vw, 6rem);
+  max-width: min(92vw, 60rem);
+}
+
+.hero__masthead {
+  font-size: var(--step-display); /* the one commanding moment */
+  letter-spacing: -0.045em;
+  margin-top: 1.5rem;
+  white-space: nowrap;
+}
+
+/* tagline whispers: dropped to the third tier in taupe so the masthead alone
+   carries weight — hierarchy comes from shrinking the tagline, not enlarging
+   the name (#3). More air above it so the eye lands on the name first. */
+.hero__tagline {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--step-sub);
+  line-height: 1.4;
+  color: var(--muted);
+  max-width: 24ch;
+}
+
+/* ---------- The pillared CTA / link button ---------- */
+
+.cta {
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: inherit;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+}
+
+.cta__label {
+  display: inline-block;
+  padding: 1rem 2rem;
+  /* present but quiet at rest (~32%) — was 14% (--hairline) and near-invisible
+     (#4). Border-only, no fill; brass stays reserved for the hover shift. */
+  border: 1px solid var(--cta-border);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  transition: border-color 0.6s var(--ease-luxe), color 0.6s var(--ease-luxe);
+}
+
+.cta:hover .cta__label,
+.cta:focus-visible .cta__label {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---------- The One Number triplet ---------- */
+
+/* third-tier sub-headings, not chips: more vertical breath and a wider column
+   gap so each word reads as considered, not a tag row (#5). */
+.triplet {
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: clamp(0.8rem, 2vh, 1.4rem) clamp(2rem, 4vw, 3rem);
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--step-sub);
+  color: var(--ink);
+}
+
+.triplet span {
+  position: relative;
+}
+
+.triplet span + span::before {
+  content: '·';
+  position: absolute;
+  left: calc(-1 * clamp(1rem, 2vw, 1.5rem)); /* centred in the wider gap */
+  color: var(--accent);
+}
+
+/* ---------- Invitation form ---------- */
+
+.form {
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  max-width: 34rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1.9rem;
+}
+
+.field label {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field input,
+.field textarea {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 1.02rem;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  padding: 0.65rem 0;
+  border-radius: 0;
+  transition: border-color 0.5s var(--ease-luxe);
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(138, 130, 117, 0.6);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 4rem;
+}
+
+.field[data-invalid='true'] input,
+.field[data-invalid='true'] textarea {
+  border-color: #9c4a3c;
+}
+
+.field__error {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #9c4a3c;
+}
+
+.form__ack {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.3rem, 1rem + 1.2vw, 1.9rem);
+  line-height: 1.35;
+  color: var(--ink);
+  max-width: 26ch;
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  padding: clamp(4rem, 10vh, 7rem) var(--gutter) clamp(2.5rem, 5vh, 3.5rem);
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.footer__wordmark {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--footer-wordmark); /* ~45% quieter than the hero — a coda (#12) */
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.footer__meta {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  text-align: right;
+  line-height: 1.8;
+}
+
+.footer__meta a:hover {
+  color: var(--accent);
+}
+
+/* ---------- Minimal header ---------- */
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(1.25rem, 3vh, 2rem) var(--gutter);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  transition: opacity 0.7s var(--ease-luxe), transform 0.7s var(--ease-luxe);
+}
+
+.site-header[data-hidden='true'] {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+  pointer-events: none;
+}
+
+.site-header[data-hidden='true'] a {
+  pointer-events: none;
+}
+
+.site-header a {
+  pointer-events: auto;
+}
+
+.site-header__wordmark {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+}
+
+.site-header__enquire {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.5s var(--ease-luxe);
+}
+
+.site-header__enquire:hover {
+  color: var(--accent);
+}
+
+/* ---------- Key reveal entrance ---------- */
+
+/* The scroll hint as one connected vertical gesture: the label sits directly
+   above a hairline that descends into the brass drip (#2). The outer node takes
+   the JS progress-fade; the inner layer breathes on its own slow cycle. */
+.key-hint {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.5rem, 5vh, 3rem);
+  transform: translateX(-50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.key-hint__inner {
+  display: block;
+  animation: key-hint-breathe 3.6s var(--ease-luxe) infinite;
+}
+
+.key-hint__label {
+  display: block;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@keyframes key-hint-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* the thin brass "drip" line growing out of the label baseline */
+.key-hint__line {
+  display: block;
+  width: 1px;
+  height: 34px;
+  margin: 0.9rem auto 0;
+  background: var(--hairline);
+  position: relative;
+  overflow: hidden;
+}
+
+.key-hint__line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: translateY(-100%);
+  animation: key-drip 2.4s var(--ease-luxe) infinite;
+}
+
+@keyframes key-drip {
+  0% {
+    transform: translateY(-100%);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* ---------- Custom cursor (#9) ---------- */
+
+/* Both layers are appended to <body> by the Cursor component and positioned via
+   GSAP transforms. They exist only on fine pointers without reduced-motion. */
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60; /* above the stage + header */
+  pointer-events: none;
+  border-radius: 50%;
+  /* center the layer on the pointer coordinate GSAP writes to x/y */
+  margin-left: calc(var(--cursor-size) / -2);
+  margin-top: calc(var(--cursor-size) / -2);
+  will-change: transform;
+}
+
+.cursor-dot {
+  width: var(--cursor-size);
+  height: var(--cursor-size);
+  background: var(--ink);
+}
+
+.cursor-ring {
+  width: var(--cursor-ring);
+  height: var(--cursor-ring);
+  margin-left: calc(var(--cursor-ring) / -2);
+  margin-top: calc(var(--cursor-ring) / -2);
+  border: 1px solid var(--cta-border);
+  transition: width 0.35s var(--ease-luxe), height 0.35s var(--ease-luxe),
+    margin 0.35s var(--ease-luxe), border-color 0.35s var(--ease-luxe);
+}
+
+/* over interactive elements: expand and tint brass */
+.cursor-ring.is-active {
+  width: calc(var(--cursor-ring) * 1.6);
+  height: calc(var(--cursor-ring) * 1.6);
+  margin-left: calc(var(--cursor-ring) * -0.8);
+  margin-top: calc(var(--cursor-ring) * -0.8);
+  border-color: var(--accent);
+}
+
+/* ---------- Reveal primitives (GSAP sets the rest) ---------- */
+
+/* element starts clipped from the bottom; .is-in unmasks upward */
+.reveal {
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  will-change: clip-path, opacity, transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -71,5 +634,10 @@ a {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+  /* reveals to final state instantly — page stays fully composed */
+  .reveal {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
   }
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Fraunces, Inter } from 'next/font/google';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll';
 import { Grain } from '@/components/ui/Grain';
+import { Cursor } from '@/components/ui/Cursor';
 import { BRAND } from '@/lib/brand';
 import './globals.css';
 
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
         <Grain />
+        <Cursor />
       </body>
     </html>
   );

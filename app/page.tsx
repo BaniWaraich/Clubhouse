@@ -1,29 +1,45 @@
+import { SiteHeader } from '@/components/ui/SiteHeader';
+import { Scene } from '@/components/three/Scene';
+import { KeyReveal } from '@/components/three/KeyReveal';
 import { Hero } from '@/components/sections/Hero';
+import { TheIdea } from '@/components/sections/TheIdea';
+import { TheOneNumber } from '@/components/sections/TheOneNumber';
+import { Discretion } from '@/components/sections/Discretion';
+import { TheClubToCome } from '@/components/sections/TheClubToCome';
+import { Invitation } from '@/components/sections/Invitation';
+import { Footer } from '@/components/sections/Footer';
 
 /**
- * Composition of sections. Currently only a placeholder Hero to prove the stack
- * (smooth scroll + scroll-linked 3D + reveals). The real single-scroll narrative
- * — The Idea → The One Number → Discretion → The Club to Come → Invitation →
- * Footer — gets built section by section after the design brainstorm.
+ * The single immersive scroll:
+ * Hero → The Idea → The One Number → Discretion → The Club to Come →
+ * Invitation (gated) → Footer.
  */
 export default function Page() {
   return (
-    <main>
-      <Hero />
-      {/* Spacer so smooth scroll + ScrollTrigger have somewhere to go.
-          Remove once real sections are added. */}
-      <section
-        style={{
-          minHeight: '100svh',
-          display: 'grid',
-          placeItems: 'center',
-          padding: 'var(--gutter)',
-        }}
-      >
-        <p style={{ color: 'var(--muted)', maxWidth: '40ch', textAlign: 'center' }}>
-          Scaffold ready. Sections to follow.
-        </p>
-      </section>
-    </main>
+    <>
+      {/* The warm room — a single persistent atmosphere behind the whole scroll,
+          not just the hero. Fixed, behind all content; the light and motes carry
+          down the page so it never collapses into flat paper below the fold. */}
+      <div className="site-atmosphere" aria-hidden>
+        <Scene />
+      </div>
+
+      {/* The entrance: a scroll-scrubbed brass-key reveal that plays over the
+          bone field, then washes to bone and hands off to the site below. Its
+          tall scroll track sits in normal flow above <main>, so the site simply
+          follows it down the page. */}
+      <KeyReveal />
+
+      <SiteHeader />
+      <main>
+        <Hero />
+        <TheIdea />
+        <TheOneNumber />
+        <Discretion />
+        <TheClubToCome />
+        <Invitation />
+      </main>
+      <Footer />
+    </>
   );
 }

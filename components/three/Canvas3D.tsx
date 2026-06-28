@@ -1,16 +1,18 @@
 'use client';
 
 import { Canvas } from '@react-three/fiber';
-import { Environment, ContactShadows, PerformanceMonitor } from '@react-three/drei';
+import { PerformanceMonitor } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { useState } from 'react';
-import { ConceptObject } from './ConceptObject';
+import { Atmosphere } from './Atmosphere';
 
 /**
- * The R3F canvas. HDRI Environment does most of the work of making materials
- * look real. PerformanceMonitor drops quality (dpr) before it drops frames.
+ * The R3F canvas for "the warm room". No object, no studio HDRI — this is
+ * atmosphere: a graded warm haze + slow motes color-matched to the bone/brass
+ * palette. Restrained bloom lifts only the brightest brass light; a soft
+ * vignette keeps the edges in the bone base so type always has air.
  *
- * PLACEHOLDER scene — the concept object is a temporary stand-in until the
- * art direction (register, material, lighting mood) is decided in the brainstorm.
+ * PerformanceMonitor drops dpr before it drops frames; dpr is capped at [1, 2].
  */
 export default function Canvas3D() {
   const [dpr, setDpr] = useState(1.5);
@@ -22,14 +24,24 @@ export default function Canvas3D() {
     <Canvas
       dpr={dpr}
       frameloop={reduce ? 'demand' : 'always'}
-      gl={{ antialias: true, alpha: true }}
+      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
       camera={{ position: [0, 0, 5], fov: 35 }}
       style={{ position: 'absolute', inset: 0 }}
     >
-      <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(2)} />
-      <Environment preset="studio" />
-      <ConceptObject paused={reduce} />
-      <ContactShadows position={[0, -1.4, 0]} opacity={0.4} blur={2.5} far={4} />
+      <color attach="background" args={['#f3efe6']} />
+      <PerformanceMonitor
+        onDecline={() => setDpr(1)}
+        onIncline={() => setDpr(Math.min(2, 2))}
+      />
+      <Atmosphere paused={reduce} />
+      <EffectComposer enableNormalPass={false}>
+        <Bloom
+          intensity={0.5}
+          luminanceThreshold={0.78}
+          luminanceSmoothing={0.5}
+          mipmapBlur
+        />
+      </EffectComposer>
     </Canvas>
   );
 }
