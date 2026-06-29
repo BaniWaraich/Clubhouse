@@ -1,13 +1,39 @@
 :root {
-  /* Locked art direction — luxe minimal, warm. Quiet money.
-     One accent (muted brass), used as light/small marks only — never a fill
-     behind text. Bone paper base, warm near-black ink. */
-  --base: #f3efe6; /* warm bone paper background */
-  --ink: #1a1714; /* warm near-black text (never pure black) */
-  --muted: #8a8275; /* taupe secondary text, kickers */
-  --accent: #a8843e; /* muted brass — light/small marks only */
-  --hairline: rgba(26, 23, 20, 0.14); /* rules, dividers, borders */
-  --cta-border: rgba(26, 23, 20, 0.32); /* CTA resting border — present but quiet (#4) */
+  /* Locked art direction — "the admittance" (spec §3.1). A warm dark→light arc:
+     you arrive in near-black at the backlit key and the page lightens room by
+     room, the candlelit hush held through the intimate middle, full warm light
+     at the invitation. Brass is the one material; it is used as light/small
+     marks and emphasis only — never a fill behind text. */
+
+  /* --- The admittance palette (mirror of lib/palette.ts ADMITTANCE) --- */
+  --paper: #f6f5f1; /* warm light base (top of arc & The Book) */
+  --candle: #14100b; /* deepest warm-dark base */
+  --warm-ink: #1a1714; /* text on light (never pure black) */
+  --taupe: #8a8275; /* secondary text on light */
+  --brass: #a8843e; /* === --accent; marks on light */
+  --brass-glow: #d8ae57; /* glow/emphasis marks on dark */
+  --brass-glow-hi: #e8c879; /* brighter emphasis on dark (text) */
+  --off-white: #e4dac8; /* text on dark */
+  --off-white-hi: #ede5d6; /* brighter text on dark */
+
+  /* --accent stays provably equal to BRASS (lib/palette.ts) — the 3D key and
+     every light-room brass mark are the same hue. Never override at :root. */
+  --accent: var(--brass);
+
+  /* --- Room-scoped tokens (default = The Book, the light end of the arc).
+     Each room class below overrides these DIRECTLY (not via an alias — inherited
+     custom properties resolve at their declaration site, so an alias declared
+     here would freeze to the light value). Every typographic primitive reads
+     these, so a single class on the <section> repaints the room's text, marks,
+     hairlines, and emphasis. --- */
+  --room-bg: #f3f1ea;
+  --ink: var(--warm-ink); /* room text */
+  --muted: var(--taupe); /* room secondary text */
+  --mark: var(--brass); /* kickers, numerals, dividers, the line */
+  --emphasis: var(--brass); /* brass text emphasis (never italic) */
+  --hairline: rgba(26, 23, 20, 0.14);
+  --cta-border: rgba(26, 23, 20, 0.32);
+  --base: #f3f1ea; /* plate matte = the room field */
 
   --measure: 38ch; /* a narrow editorial measure */
   --gutter: clamp(1.5rem, 6vw, 8rem);
@@ -62,8 +88,10 @@ body.has-cursor {
 }
 
 body {
-  background: var(--base);
-  color: var(--ink);
+  /* the page opens dark — deepest warm-dark sits behind everything so there is
+     no bone flash at the threshold; the light rooms paint over it. */
+  background: var(--candle);
+  color: var(--off-white-hi);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-feature-settings: 'liga' 1, 'kern' 1;
   font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -77,8 +105,7 @@ h2,
 h3 {
   font-family: var(--font-display), Georgia, serif;
   font-weight: 400;
-  font-optical-sizing: auto;
-  font-variation-settings: 'SOFT' 0, 'WONK' 0;
+  font-optical-sizing: auto; /* Newsreader opsz — display weight at large sizes */
   text-wrap: balance;
   line-height: 1.02;
   letter-spacing: -0.02em;
@@ -107,15 +134,96 @@ a {
   color: var(--ink);
 }
 
+/* ---------- The admittance: per-room theming ---------- */
+
+/* Each room paints its own warm background and repaints its text/marks via the
+   room tokens, so with ZERO JS and ZERO 3D every room already shows its correct
+   base colour, type colour, and emphasis (Phase 2 goal). Phase 3's travelling
+   light animates these same values continuously. */
+.section,
+.hero {
+  background-color: var(--room-bg);
+  color: var(--ink);
+}
+
+/* Dark rooms — the candlelit hush. Text lifts to warm off-white; marks and
+   emphasis use the brighter brass glow so they read against near-black. */
+.room--dark {
+  --ink: var(--off-white-hi);
+  --muted: rgba(228, 218, 200, 0.58);
+  --mark: var(--brass-glow);
+  --emphasis: var(--brass-glow-hi);
+  --hairline: rgba(228, 218, 200, 0.16);
+  --cta-border: rgba(228, 218, 200, 0.3);
+  --base: var(--room-bg);
+}
+
+/* The six room backgrounds, in scroll order (spec §3.1). */
+.room--threshold {
+  --room-bg: #100b07;
+}
+.room--anteroom {
+  --room-bg: #19120b;
+}
+.room--hearth {
+  --room-bg: #251a10;
+}
+.room--quiet {
+  --room-bg: #322617;
+}
+/* The Room Not Yet Built — the mid, door-ajar tone. Light has begun to arrive,
+   so it carries dark ink with a deeper brass emphasis rather than the glow. */
+.room--ajar {
+  --room-bg: #8f7a5a;
+  --ink: #1c1710;
+  --muted: rgba(28, 23, 16, 0.66);
+  --mark: #4a3a1f;
+  --emphasis: #2c2110;
+  --hairline: rgba(28, 23, 16, 0.24);
+  --cta-border: rgba(28, 23, 16, 0.36);
+  --base: var(--room-bg);
+}
+/* The Book — full warm light; the default tokens already describe it. */
+.room--book {
+  --room-bg: #f3f1ea;
+}
+
 /* ---------- Editorial primitives ---------- */
 
-/* letterspaced small-caps kicker label, sits above headings */
+/* Signature voice (spec §3.2): IBM Plex Mono for every small mark — kickers,
+   captions, the triplet, form labels, the number. Reads as a private line /
+   ledger / dossier, tied to the One Number. */
+.mono {
+  font-family: var(--font-mono), ui-monospace, 'SFMono-Regular', monospace;
+  font-feature-settings: 'liga' 0;
+}
+
+/* Brass emphasis (spec §3.2) — colour + a touch of tracking + mid weight,
+   NEVER italic. Brass adjusts per room (glow on dark, brass on light). */
+.em {
+  color: var(--emphasis);
+  font-weight: 500;
+  letter-spacing: 0.012em;
+}
+
+/* The refrain mark — "You are expected." Opens at the key, closes at the
+   invitation. A quiet mono line, brass on its room. */
+.refrain {
+  display: inline-block;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--mark);
+}
+
+/* letterspaced kicker label, sits above headings — set in the mono voice */
 .kicker {
   display: inline-block;
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.7rem;
   font-weight: 500;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -127,8 +235,8 @@ a {
   height: 1px;
   margin-right: 0.85rem;
   vertical-align: middle;
-  background: var(--accent);
-  opacity: 0.8;
+  background: var(--mark);
+  opacity: 0.85;
 }
 
 .measure {
@@ -147,14 +255,113 @@ a {
 .site-atmosphere {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 1; /* above the travelling-light spine, below content */
   pointer-events: none;
 }
 
 main,
 .footer {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+/* ---------- Phase 3: the travelling light (spine) ---------- */
+
+/* One continuous fixed background that the spine tween drives from near-black
+   through the six room values to full warm light across the whole scroll
+   (spec §3.3). It always exists behind everything; when motion is OFF the
+   opaque per-room section backgrounds simply cover it, so reduced-motion /
+   no-JS still renders the correct static arc (the Phase 2 fallback). */
+.spine {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #100b07; /* Threshold — the spine tween takes it from here */
+}
+
+/* When the choreography is live, the rooms go transparent so the single
+   travelling light reads through them as one continuous, never-dying field. */
+html[data-motion] .section,
+html[data-motion] .hero,
+html[data-motion] .footer {
+  background-color: transparent;
+}
+
+/* "Light enters first" (spec §3.3) — a warm vignette blooms out of the dark as
+   you cross into each room, BEFORE the words resolve into it. The bloom opacity
+   is driven by --enter (0 → 1), which BodyMotion animates on room entry; it
+   defaults to 1 so a static/no-JS page shows each room already lit. */
+.section::before,
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--enter, 1);
+  background: radial-gradient(
+    120% 90% at 30% 24%,
+    rgba(232, 200, 121, 0.1) 0%,
+    rgba(216, 174, 87, 0.04) 34%,
+    transparent 70%
+  );
+}
+
+/* light rooms get a cooler, paler bloom so it never muddies the paper */
+.room--ajar::before,
+.room--book::before {
+  background: radial-gradient(
+    120% 90% at 30% 24%,
+    rgba(255, 252, 244, 0.5) 0%,
+    rgba(246, 245, 241, 0.18) 40%,
+    transparent 72%
+  );
+}
+
+/* (content already sits above the ::before bloom: the existing
+   `.section > *:not(.section__index)` and `.hero__content` rules carry z-index:1,
+   while the bloom and the faint numeral sit at z-index:0.) */
+
+/* The Hearth's one-time glow swell rides the same --enter var with a stronger,
+   warmer pool centred on the copy. */
+.room--hearth::before {
+  background: radial-gradient(
+    90% 80% at 26% 38%,
+    rgba(232, 200, 121, 0.22) 0%,
+    rgba(216, 174, 87, 0.08) 38%,
+    transparent 72%
+  );
+}
+
+/* The Room Not Yet Built — a near-empty, centred tease. No plate; just the copy
+   and a thin line of light that widens (spec §3.3 — the door left ajar). */
+.ajar {
+  max-width: var(--measure);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.ajar__lead {
+  margin-inline: auto;
+}
+
+/* the thin line of light — BodyMotion eases --ajar-open 0 → 1 to widen it from
+   the centre. Defaults to 1 so static / no-JS shows the full line. */
+.ajar__line {
+  display: block;
+  width: min(26rem, 60vw);
+  height: 1px;
+  margin: clamp(2.5rem, 6vh, 4rem) auto 0;
+  transform: scaleX(var(--ajar-open, 1));
+  transform-origin: center;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mark) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px rgba(216, 174, 87, 0.35);
 }
 
 /* section shell — vast vertical margins, content in a narrow offset measure.
@@ -310,10 +517,10 @@ main,
 .cta__label {
   display: inline-block;
   padding: 1rem 2rem;
-  /* present but quiet at rest (~32%) — was 14% (--hairline) and near-invisible
-     (#4). Border-only, no fill; brass stays reserved for the hover shift. */
+  /* present but quiet at rest. Border-only, no fill; brass stays reserved for
+     the hover shift. Follows the room so it reads on dark and light alike. */
   border: 1px solid var(--cta-border);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.72rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -323,8 +530,8 @@ main,
 
 .cta:hover .cta__label,
 .cta:focus-visible .cta__label {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--emphasis);
+  color: var(--emphasis);
 }
 
 /* ---------- The One Number triplet ---------- */
@@ -337,8 +544,11 @@ main,
   flex-wrap: wrap;
   align-items: baseline;
   gap: clamp(0.8rem, 2vh, 1.4rem) clamp(2rem, 4vw, 3rem);
-  font-family: var(--font-display), Georgia, serif;
-  font-size: var(--step-sub);
+  /* the triplet is a small mark — set in the mono voice (spec §3.2), tracked
+     like a ledger line rather than serif sub-headings */
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(0.92rem, 0.85rem + 0.4vw, 1.15rem);
+  letter-spacing: 0.04em;
   color: var(--ink);
 }
 
@@ -350,25 +560,25 @@ main,
   content: '·';
   position: absolute;
   left: calc(-1 * clamp(1rem, 2vw, 1.5rem)); /* centred in the wider gap */
-  color: var(--accent);
+  color: var(--mark);
 }
 
 /* ---------- Invitation form ---------- */
 
 .form {
-  margin-top: clamp(2.5rem, 6vh, 4rem);
+  margin-top: clamp(1.5rem, 3.5vh, 2.25rem);
   max-width: 34rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
-  margin-bottom: 1.9rem;
+  gap: 0.4rem;
+  margin-bottom: 1.15rem;
 }
 
 .field label {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -383,7 +593,7 @@ main,
   background: transparent;
   border: 0;
   border-bottom: 1px solid var(--hairline);
-  padding: 0.65rem 0;
+  padding: 0.5rem 0;
   border-radius: 0;
   transition: border-color 0.5s var(--ease-luxe);
 }
@@ -396,12 +606,12 @@ main,
 .field input:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: var(--emphasis);
 }
 
 .field textarea {
   resize: vertical;
-  min-height: 4rem;
+  min-height: 2.75rem;
 }
 
 .field[data-invalid='true'] input,
@@ -428,6 +638,15 @@ main,
 /* ---------- Footer ---------- */
 
 .footer {
+  /* the coda continues The Book's full warm light — its own light room so the
+     wordmark and meta read on paper, not on the dark base behind the page. */
+  --room-bg: #f3f1ea;
+  --ink: var(--warm-ink);
+  --muted: var(--taupe);
+  --mark: var(--brass);
+  --hairline: rgba(26, 23, 20, 0.14);
+  background-color: var(--room-bg);
+  color: var(--ink);
   padding: clamp(4rem, 10vh, 7rem) var(--gutter) clamp(2.5rem, 5vh, 3.5rem);
   border-top: 1px solid var(--hairline);
   display: flex;
@@ -445,16 +664,16 @@ main,
 }
 
 .footer__meta {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 0.78rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.74rem;
   letter-spacing: 0.04em;
   color: var(--muted);
   text-align: right;
-  line-height: 1.8;
+  line-height: 1.9;
 }
 
 .footer__meta a:hover {
-  color: var(--accent);
+  color: var(--mark);
 }
 
 /* ---------- Minimal header ---------- */
@@ -469,7 +688,9 @@ main,
   align-items: center;
   justify-content: space-between;
   padding: clamp(1.25rem, 3vh, 2rem) var(--gutter);
-  mix-blend-mode: multiply;
+  /* crosses the whole dark→light arc; sits warm off-white so it reads on the
+     near-black threshold where it is most visible (it fades out on scroll). */
+  color: var(--off-white-hi);
   pointer-events: none;
   transition: opacity 0.7s var(--ease-luxe), transform 0.7s var(--ease-luxe);
 }
@@ -495,16 +716,16 @@ main,
 }
 
 .site-header__enquire {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-mono), ui-monospace, monospace;
   font-size: 0.7rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: rgba(228, 218, 200, 0.62);
   transition: color 0.5s var(--ease-luxe);
 }
 
 .site-header__enquire:hover {
-  color: var(--accent);
+  color: var(--brass-glow);
 }
 
 /* ---------- Key reveal entrance ---------- */
@@ -618,6 +839,278 @@ main,
   margin-left: calc(var(--cursor-ring) * -0.8);
   margin-top: calc(var(--cursor-ring) * -0.8);
   border-color: var(--accent);
+}
+
+/* ---------- Editorial chapter grid (Phase 1) ---------- */
+
+/* Asymmetric ~12-col system: a plate on one side, the offset text measure on
+   the other, with generous negative space. Side modifiers alternate which side
+   the plate sits on down the page. Respects --gutter (via .section padding) and
+   the existing --measure. Single-column and stacked below the editorial breakpoint. */
+.chapter {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  align-items: center;
+}
+
+.chapter__copy {
+  /* never wider than the editorial measure regardless of the column it lands in */
+  max-width: var(--measure);
+}
+
+.chapter__media {
+  /* the plate column; min-width:0 keeps the grid from overflowing on narrow screens */
+  min-width: 0;
+}
+
+@media (min-width: 60rem) {
+  .chapter {
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: clamp(2rem, 5vw, 6rem);
+  }
+
+  /* plate left (cols 1–5), copy right (cols 7–12) */
+  .chapter--left .chapter__media {
+    grid-column: 1 / span 5;
+  }
+  .chapter--left .chapter__copy {
+    grid-column: 7 / span 6;
+  }
+
+  /* plate right (cols 8–12), copy left (cols 1–6) — visual order keeps copy
+     first in source so reading order is preserved for assistive tech */
+  .chapter--right .chapter__media {
+    grid-column: 8 / span 5;
+  }
+  .chapter--right .chapter__copy {
+    grid-column: 1 / span 6;
+  }
+}
+
+/* Full-bleed modifier — the one cinematic landscape moment breaks the gutter to
+   the viewport edges while every other chapter stays inset. Used by TheClubToCome.
+   The negative margins cancel the .section --gutter padding; copy re-inset below. */
+.chapter--bleed {
+  display: block;
+  margin-left: calc(-1 * var(--gutter));
+  margin-right: calc(-1 * var(--gutter));
+}
+
+.chapter--bleed .chapter__copy {
+  max-width: var(--measure);
+  margin: clamp(2.5rem, 6vw, 5rem) auto 0;
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+
+/* ---------- Treated media plate (Phase 1: gradient placeholders) ---------- */
+
+/* A <figure class="plate plate--{variant}">. In Phase 1 it carries only the
+   graded gradient + grain + hairline edge; Phase 2 slots a real <img>/next/image
+   behind the .plate__treatment layer through the same shadow→highlight ramp. */
+.plate {
+  position: relative;
+  overflow: hidden;
+  /* never an opaque punch-out through the warm room: the base shows at the seams
+     and the grain integrates it. A quiet hairline gives the site's edge language. */
+  border: 1px solid var(--hairline);
+  background-color: var(--base);
+  aspect-ratio: 4 / 5; /* default; --ratio overrides per prop */
+  aspect-ratio: var(--plate-ratio, 4 / 5);
+}
+
+/* aspect ratios driven by the `ratio` prop */
+.plate--portrait {
+  --plate-ratio: 4 / 5;
+}
+.plate--square {
+  --plate-ratio: 1 / 1;
+}
+.plate--landscape {
+  --plate-ratio: 3 / 2;
+}
+.plate--wide {
+  --plate-ratio: 16 / 9;
+}
+
+/* Phase-2 image slot — sits behind the treatment so the duotone ramp lies over
+   it. Empty in Phase 1. */
+.plate__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The duotone treatment layer — the bone-shadow → brass-highlight ramp.
+   Implemented now as layered gradients per variant; in Phase 2 the same layer
+   becomes a mix-blend duotone over .plate__media (the SVG filter / blend ramp
+   plugs in here without relayout). */
+.plate__treatment {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Edge feather (#1) — the fill layers dissolve into the surrounding bone matte
+   instead of presenting a hard rectangle, so the fixed warm room still frames
+   each plate. A uniform four-side inset fade (two crossed linear masks,
+   intersected) reads evenly across every ratio — a radial fade would distort on
+   non-square plates. Applied to both the gradient treatment AND the Phase-2
+   photo so real imagery inherits the same intentional vignette-into-bone. The
+   .plate border + .plate__edge hairline stay unmasked, keeping a crisp edge for
+   definition while the dark fills melt at the seams. */
+.plate__treatment,
+.plate__media {
+  --plate-feather: 10%;
+  -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--plate-feather),
+      #000 calc(100% - var(--plate-feather)),
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--plate-feather),
+      #000 calc(100% - var(--plate-feather)),
+      transparent 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--plate-feather),
+      #000 calc(100% - var(--plate-feather)),
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--plate-feather),
+      #000 calc(100% - var(--plate-feather)),
+      transparent 100%
+    );
+  mask-composite: intersect;
+}
+
+/* light — a warm candle bloom rising out of the near-black; the single soft
+   light source for a dark room (Anteroom), not a bone panel */
+.plate--light .plate__treatment {
+  background:
+    radial-gradient(
+      120% 95% at 22% 18%,
+      rgba(232, 200, 121, 0.32) 0%,
+      rgba(216, 174, 87, 0.12) 34%,
+      rgba(20, 16, 11, 0) 66%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(58, 44, 26, 0.95) 0%,
+      rgba(30, 23, 14, 0.98) 58%,
+      rgba(16, 12, 8, 1) 100%
+    );
+}
+
+/* shaft — near-black field with a single brass shaft of candlelight (Hearth) */
+.plate--shaft .plate__treatment {
+  background:
+    linear-gradient(
+      105deg,
+      rgba(216, 174, 87, 0) 36%,
+      rgba(232, 200, 121, 0.4) 50%,
+      rgba(216, 174, 87, 0) 64%
+    ),
+    linear-gradient(
+      160deg,
+      rgba(40, 30, 18, 0.97) 0%,
+      rgba(28, 21, 13, 0.98) 55%,
+      rgba(18, 13, 8, 1) 100%
+    );
+}
+
+/* shadow — deepest warm-dark with one quiet brass glint; the "absence" plate
+   (The Quiet) */
+.plate--shadow .plate__treatment {
+  background:
+    radial-gradient(
+      42% 38% at 70% 30%,
+      rgba(216, 174, 87, 0.22) 0%,
+      rgba(216, 174, 87, 0) 62%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(28, 22, 14, 0.99) 0%,
+      rgba(16, 12, 8, 1) 60%,
+      rgba(22, 17, 11, 0.99) 100%
+    );
+}
+
+/* air — wide, hazy warm mist for the full-bleed landscape; light has begun to
+   arrive (The Room Not Yet Built), so it lifts toward the mid door-ajar tone */
+.plate--air .plate__treatment {
+  background:
+    radial-gradient(
+      95% 150% at 50% 118%,
+      rgba(232, 200, 121, 0.32) 0%,
+      rgba(216, 174, 87, 0) 46%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(78, 64, 44, 0.85) 0%,
+      rgba(120, 102, 74, 0.8) 42%,
+      rgba(159, 138, 101, 0.78) 74%,
+      rgba(199, 176, 128, 0.62) 100%
+    );
+}
+
+/* Grain over the plate — same fractal-noise data-URI language as the global
+   <Grain> overlay, scoped here and blended so the gradient never reads as flat
+   vector fill. No external file. */
+.plate__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+}
+
+/* an inner hairline edge — reinforces the site's edge language on darker plates
+   where the outer border sinks into the gradient */
+.plate__edge {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(243, 239, 230, 0.06);
+}
+
+/* full-bleed plate: square off the side edges so it meets the viewport cleanly */
+.plate--bleed {
+  border-left: 0;
+  border-right: 0;
+}
+
+/* Reduce dark-plate dominance below the grid breakpoint (#2). Below 60rem the
+   12-col grid collapses and plates stack full-width; a tall portrait/square dark
+   fill then towers over the small viewport. For the two dark variants only,
+   force a shorter landscape ratio and inset them so bone frames all four sides.
+   light (high-key portrait) and air (already --bleed/wide) are left untouched,
+   as is every desktop size. */
+@media (max-width: 59.999rem) {
+  .plate--shaft,
+  .plate--shadow {
+    --plate-ratio: 3 / 2;
+    max-height: 42vh;
+    max-width: 30rem;
+    margin-inline: auto;
+  }
 }
 
 /* ---------- Reveal primitives (GSAP sets the rest) ---------- */

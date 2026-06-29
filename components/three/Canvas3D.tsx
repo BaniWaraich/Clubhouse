@@ -24,11 +24,12 @@ export default function Canvas3D() {
     <Canvas
       dpr={dpr}
       frameloop={reduce ? 'demand' : 'always'}
-      gl={{ antialias: true, alpha: false, powerPreference: 'high-performance' }}
+      // transparent: the CSS travelling-light spine is the background; the
+      // atmosphere only layers warm haze, motes and brass glow over it.
+      gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       camera={{ position: [0, 0, 5], fov: 35 }}
       style={{ position: 'absolute', inset: 0 }}
     >
-      <color attach="background" args={['#f3efe6']} />
       <PerformanceMonitor
         onDecline={() => setDpr(1)}
         onIncline={() => setDpr(Math.min(2, 2))}
@@ -36,9 +37,9 @@ export default function Canvas3D() {
       <Atmosphere paused={reduce} />
       <EffectComposer enableNormalPass={false}>
         <Bloom
-          intensity={0.5}
-          luminanceThreshold={0.78}
-          luminanceSmoothing={0.5}
+          intensity={0.16}
+          luminanceThreshold={0.9}
+          luminanceSmoothing={0.3}
           mipmapBlur
         />
       </EffectComposer>

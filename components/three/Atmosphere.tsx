@@ -25,9 +25,10 @@ import { PALETTE } from '@/lib/palette';
  * useFrame lerps toward it so motion stays buttery, never snappy.
  */
 
-const BASE = new Color(PALETTE.base);
-const GLOW = new Color(PALETTE.glow); // brass family (aligned to --accent, #13)
-const DEEP = new Color('#e7dcc4'); // deepened warm wash for late scroll
+import { ADMITTANCE } from '@/lib/palette';
+
+const GLOW = new Color(ADMITTANCE.brassGlow); // warm brass glow over the dark
+const DEEP = new Color(ADMITTANCE.brassGlowHi); // brighter glow as light arrives
 
 // Soft radial gradient haze. Two drifting warm pools over the bone base; a
 // scroll uniform deepens the light. No hard edges, nothing reads as an object.
@@ -45,7 +46,6 @@ const hazeFragment = /* glsl */ `
   uniform float uTime;
   uniform float uScroll;
   uniform float uAspect;
-  uniform vec3 uBase;
   uniform vec3 uGlow;
   uniform vec3 uDeep;
 
@@ -57,23 +57,25 @@ const hazeFragment = /* glsl */ `
   void main() {
     vec2 uv = vUv;
 
-    // two slowly drifting warm pools of light
+    // two slowly drifting warm pools of candlelight
     float t = uTime * 0.04;
     vec2 c1 = vec2(0.62 + 0.05 * sin(t), 0.34 + 0.04 * cos(t * 0.8));
     vec2 c2 = vec2(0.30 + 0.04 * cos(t * 0.7), 0.66 + 0.05 * sin(t * 0.9));
 
-    float pool = softPool(uv, c1, 0.85) * 0.9 + softPool(uv, c2, 1.05) * 0.55;
+    // tight pools so most of the field stays the dark spine — localized
+    // candlelight, not a screen-wide veil.
+    float pool = softPool(uv, c1, 0.42) * 0.8 + softPool(uv, c2, 0.5) * 0.45;
     pool = clamp(pool, 0.0, 1.0);
 
-    // deepen the wash as the page scrolls
+    // TRANSPARENT atmosphere: the CSS spine is the background; we only ADD a warm
+    // brass glow over it. The glow brightens slightly through the dark middle then
+    // fades out as the page reaches full warm light, so it never blows out paper.
     vec3 warm = mix(uGlow, uDeep, clamp(uScroll * 1.2, 0.0, 1.0));
-    vec3 col = mix(uBase, warm, pool * (0.5 + 0.5 * uScroll));
+    float fade = 1.0 - smoothstep(0.55, 0.95, uScroll); // gone by The Book
+    // a subtle candlelit warmth ONLY — never a gold wash over the dark rooms.
+    float a = pool * (0.06 + 0.04 * uScroll) * fade;
 
-    // gentle vignette toward the bone base so type always has air
-    float vig = smoothstep(1.25, 0.2, length((uv - 0.5) * vec2(uAspect, 1.0)));
-    col = mix(uBase, col, 0.35 + 0.65 * vig);
-
-    gl_FragColor = vec4(col, 1.0);
+    gl_FragColor = vec4(warm, a);
   }
 `;
 
@@ -87,7 +89,6 @@ function Haze({ paused }: { paused: boolean }) {
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uAspect: { value: size.width / size.height },
-      uBase: { value: BASE },
       uGlow: { value: GLOW },
       uDeep: { value: DEEP },
     }),
@@ -128,6 +129,7 @@ function Haze({ paused }: { paused: boolean }) {
         uniforms={uniforms}
         vertexShader={hazeVertex}
         fragmentShader={hazeFragment}
+        transparent
         depthTest={false}
         depthWrite={false}
       />

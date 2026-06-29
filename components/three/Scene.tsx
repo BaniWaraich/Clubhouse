@@ -15,7 +15,10 @@ const Canvas3D = dynamic(() => import('./Canvas3D'), {
   loading: () => <GradedBackdrop />,
 });
 
-/** Static, palette-graded warm room — CSS only. Designed, not a spinner. */
+/** Static warm-dark glow — CSS only, TRANSPARENT base so the travelling-light
+ *  spine shows through. Designed (a candlelit pool), never a spinner or a flat
+ *  fill. Doubles as the no-WebGL atmosphere: the spine + per-room blooms still
+ *  carry the full admittance arc without any canvas. */
 export function GradedBackdrop() {
   return (
     <div
@@ -24,9 +27,8 @@ export function GradedBackdrop() {
         position: 'absolute',
         inset: 0,
         background:
-          'radial-gradient(70% 60% at 62% 34%, rgba(202,162,88,0.34), transparent 64%),' +
-          'radial-gradient(80% 70% at 28% 70%, rgba(202,162,88,0.18), transparent 70%),' +
-          'var(--base)',
+          'radial-gradient(70% 60% at 62% 34%, rgba(216,174,87,0.16), transparent 64%),' +
+          'radial-gradient(80% 70% at 28% 70%, rgba(216,174,87,0.08), transparent 70%)',
       }}
     />
   );

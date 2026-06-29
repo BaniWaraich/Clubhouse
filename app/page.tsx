@@ -8,6 +8,7 @@ import { Discretion } from '@/components/sections/Discretion';
 import { TheClubToCome } from '@/components/sections/TheClubToCome';
 import { Invitation } from '@/components/sections/Invitation';
 import { Footer } from '@/components/sections/Footer';
+import { BodyMotion } from '@/components/motion/BodyMotion';
 
 /**
  * The single immersive scroll:
@@ -17,9 +18,14 @@ import { Footer } from '@/components/sections/Footer';
 export default function Page() {
   return (
     <>
+      {/* The travelling light (spec §3.3) — one continuous fixed background the
+          spine tween drives near-black → warm light across the whole scroll.
+          Sits behind everything; opaque rooms cover it when motion is off. */}
+      <div className="spine" aria-hidden />
+
       {/* The warm room — a single persistent atmosphere behind the whole scroll,
-          not just the hero. Fixed, behind all content; the light and motes carry
-          down the page so it never collapses into flat paper below the fold. */}
+          not just the hero. Fixed, above the spine and below content; the warm
+          haze, motes and brass glow ride over the travelling light. */}
       <div className="site-atmosphere" aria-hidden>
         <Scene />
       </div>
@@ -40,6 +46,12 @@ export default function Page() {
         <Invitation />
       </main>
       <Footer />
+
+      {/* The admittance spine — travelling light, light-enters-first per room,
+          the Hearth glow swell + triplet print-in, the Quiet's stillness, the
+          Room-to-come light-line widen, and the door trigger. Reads existing DOM,
+          rides the single Lenis RAF, and gates reduced-motion / mobile itself. */}
+      <BodyMotion />
     </>
   );
 }
