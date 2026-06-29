@@ -16,7 +16,7 @@ export function Discretion() {
       <SectionIndex numeral="III" />
       <div className="chapter chapter--left">
         <div className="chapter__media">
-          <Plate variant="shadow" ratio="square" />
+          <Plate variant="shadow" ratio="square" src="/img/discretion.svg" />
         </div>
         <div className="chapter__copy">
           <p className="kicker" data-copy>

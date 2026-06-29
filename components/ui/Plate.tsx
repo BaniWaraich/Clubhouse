@@ -33,6 +33,7 @@ export function Plate({
     'plate',
     `plate--${variant}`,
     `plate--${ratio}`,
+    src ? 'plate--media' : '', // treatment becomes a grading veil over the image
     bleed ? 'plate--bleed' : '',
     className ?? '',
   ]

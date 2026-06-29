@@ -1,20 +1,22 @@
-# Chapter imagery — Phase 2
+# Chapter imagery — Phase 4
 
-This directory is intentionally empty in Phase 1 (the chapters render graded
-CSS-gradient placeholders via `<Plate>`; no binaries are committed).
+Three rooms carry a treated media plate. Each holds a **generated, warm, abstract
+texture** (smoke / silk in the candlelit register) graded to the palette — never
+a place, partner, or face (a hard guardrail). They are passed to `<Plate src>`,
+which sits behind the duotone treatment veil (`.plate--media .plate__treatment`)
+and the grain; each plate reserves its aspect-ratio, so swapping assets causes
+**no relayout**.
 
-Phase 2 drops the real photographs here and passes their paths to `<Plate src>`
-(wired through `next/image`, behind the existing duotone treatment layer). Each
-plate already reserves its aspect-ratio, so adding the images causes **no
-relayout**.
+| File                | Chapter        | Plate variant / ratio |
+| ------------------- | -------------- | --------------------- |
+| `idea.svg`          | The Idea       | light / portrait      |
+| `one-number.svg`    | The One Number | shaft / portrait      |
+| `discretion.svg`    | Discretion     | shadow / square       |
 
-Expected filenames (one per chapter):
+The textures are inline-filter SVGs (feTurbulence-based smoke + warm gradients),
+deterministic and tiny — no binaries, no network. To swap in real **abstract**
+photography later, drop a file here and point the room's `<Plate src>` at it; the
+treatment + grain + edge feather grade it to the room automatically.
 
-| File             | Chapter        | Plate variant / ratio |
-| ---------------- | -------------- | --------------------- |
-| `idea.jpg`       | The Idea       | light / portrait      |
-| `one-number.jpg` | The One Number | shaft / portrait      |
-| `discretion.jpg` | Discretion     | shadow / square       |
-| `club.jpg`       | The Club to Come | air / wide (bleed)  |
-
-The Invitation section uses no photograph (a hairline framing element only).
+The Club to Come and the Invitation use no plate (a thin line of light / a
+hairline framing only).

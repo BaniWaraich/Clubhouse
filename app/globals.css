@@ -1067,6 +1067,25 @@ html[data-motion] .footer {
     );
 }
 
+/* Phase 4 — when a real image fills .plate__media, the treatment stops being an
+   opaque mood fill and becomes a GRADING VEIL instead: a soft warm-dark vignette
+   that sinks the edges into the room and a faint brass multiply that ties the
+   texture to the palette, so the abstract image reads through, graded — never
+   hidden. Overrides the per-variant gradient above (same specificity, later). */
+.plate--media .plate__treatment {
+  background:
+    radial-gradient(
+      120% 100% at 32% 22%,
+      rgba(216, 174, 87, 0.08) 0%,
+      rgba(216, 174, 87, 0) 38%
+    ),
+    radial-gradient(
+      130% 120% at 50% 50%,
+      rgba(16, 11, 7, 0) 42%,
+      rgba(16, 11, 7, 0.78) 100%
+    );
+}
+
 /* Grain over the plate — same fractal-noise data-URI language as the global
    <Grain> overlay, scoped here and blended so the gradient never reads as flat
    vector fill. No external file. */

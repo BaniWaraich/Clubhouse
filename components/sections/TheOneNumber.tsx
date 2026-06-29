@@ -40,7 +40,7 @@ export function TheOneNumber() {
           </div>
         </div>
         <div className="chapter__media">
-          <Plate variant="shaft" ratio="portrait" />
+          <Plate variant="shaft" ratio="portrait" src="/img/one-number.svg" />
         </div>
       </div>
     </section>
