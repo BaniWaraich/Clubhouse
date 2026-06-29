@@ -33,7 +33,9 @@
       "Bash(node _shot.js)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
       "Bash(curl -s -o /dev/null -w \"port3000=%{http_code}\\\\n\" http://localhost:3000/)",
-      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" http://localhost:3000/)"
+      "Bash(curl -s -o /dev/null -w \"status=%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(node ./_keyframes4.js BEFORE)",
+      "Bash(node ./_keyframes4.js AFTER)"
     ]
   }
 }
