@@ -73,6 +73,10 @@ export function BodyMotion() {
         // through them as one continuous field.
         root.dataset.motion = 'on';
 
+        // Cleanup for the spine's ResizeObserver (set below if .spine exists);
+        // returned from this matchMedia branch so it disconnects on revert.
+        let spineCleanup: (() => void) | undefined;
+
         /* ---- 1. The travelling light: one deterministic interpolation across
                 the six room centres (no competing tweens on one property). ---- */
         const spine = document.querySelector<HTMLElement>('.spine');
@@ -88,7 +92,6 @@ export function BodyMotion() {
           // full warm light to arrive AS the form enters, not at the very bottom.
           const ANCHOR = [0.5, 0.5, 0.5, 0.5, 0.5, 0.22];
           let centres: number[] = [];
-          let measuredAt = -1;
           const measure = (scroll: number) => {
             // document-absolute anchors (offsetTop is relative to <main>, which
             // sits below the 320vh key-track — so use the rect + live scroll).
@@ -97,12 +100,13 @@ export function BodyMotion() {
               const r = el.getBoundingClientRect();
               return r.top + scroll + r.height * ANCHOR[i];
             });
-            // Re-measure when the document height changes — the KeyReveal track
-            // starts at 0 and grows to 320vh after WebGL detection resolves, which
-            // shifts every room down without firing a ScrollTrigger refresh.
-            measuredAt = document.documentElement.scrollHeight;
           };
 
+          // Measure on REFRESH only. Never read layout (scrollHeight / rects)
+          // inside onUpdate — doing so forced a synchronous reflow every scroll
+          // frame, which was the choppiness. Height changes (the 320vh key-track
+          // resolving) are caught by the ResizeObserver below → a debounced
+          // refresh → onRefresh → measure(). All event-driven, never per-frame.
           ScrollTrigger.create({
             trigger: document.documentElement,
             start: 'top top',
@@ -111,9 +115,7 @@ export function BodyMotion() {
             onRefresh: (self) => measure(self.scroll()),
             onUpdate: (self) => {
               const scroll = self.scroll();
-              if (!centres.length || document.documentElement.scrollHeight !== measuredAt) {
-                measure(scroll);
-              }
+              if (!centres.length) measure(scroll);
               // compare the document coordinate at the VIEWPORT CENTRE against the
               // room centres, so the spine equals a room's colour when that room
               // is centred on screen.
@@ -137,6 +139,20 @@ export function BodyMotion() {
               }
             },
           });
+
+          // Event-driven height watch — replaces the per-frame scrollHeight read.
+          // Fires only when the document actually resizes (e.g. the key-track
+          // resolving), debounced to one frame, and re-measures via refresh.
+          let roRaf = 0;
+          const ro = new ResizeObserver(() => {
+            cancelAnimationFrame(roRaf);
+            roRaf = requestAnimationFrame(() => ScrollTrigger.refresh());
+          });
+          ro.observe(document.body);
+          spineCleanup = () => {
+            ro.disconnect();
+            cancelAnimationFrame(roRaf);
+          };
         }
 
         /* ---- 2–5. Per-room entrances ---- */
@@ -268,6 +284,9 @@ export function BodyMotion() {
         if ('fonts' in document) {
           document.fonts.ready.then(() => ScrollTrigger.refresh());
         }
+
+        // Disconnect the ResizeObserver when this branch reverts.
+        return () => spineCleanup?.();
       },
     );
   });

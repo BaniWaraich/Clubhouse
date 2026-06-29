@@ -50,3 +50,20 @@ overflow). Hero re-light visually signed off by the user.
   ramp already exist; confirm the image slot, then parallelise per-component.
 - Atmosphere/spine are subtle by design — imagery should sit behind the Plate
   treatment, not fight the travelling light.
+
+## Phase 3 review fix — scroll choppiness
+- Symptom: choppy transitions across the whole scroll.
+- Cause: the travelling-light spine ScrollTrigger (scrub:true, spanning the whole
+  document) read `document.documentElement.scrollHeight` inside `onUpdate` every
+  frame → forced a synchronous layout reflow each frame, then wrote a full-screen
+  `backgroundColor` repaint. Read-layout-then-write-style at 60fps over the WebGL
+  canvas = the jank. The per-frame scrollHeight check was redundant once KeyReveal
+  refreshes on resolve.
+- Fix (BodyMotion.tsx): measure room centres on `onRefresh` ONLY; `onUpdate` no
+  longer touches layout. A `ResizeObserver` on `document.body` catches real height
+  changes (key-track resolve) → rAF-debounced `ScrollTrigger.refresh()` →
+  `onRefresh` → measure. Observer disconnected via the matchMedia branch cleanup.
+- Verified: `tsc --noEmit` clean, `npm run lint` clean.
+- If any residual softness remains in the colour travel specifically, the next
+  lever is replacing the per-frame `backgroundColor` paint with opacity crossfades
+  of stacked solid layers (compositor-only) — not done yet; reflow was the cause.
