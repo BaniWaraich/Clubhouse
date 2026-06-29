@@ -9,7 +9,6 @@ import { TheClubToCome } from '@/components/sections/TheClubToCome';
 import { Invitation } from '@/components/sections/Invitation';
 import { Footer } from '@/components/sections/Footer';
 import { BodyMotion } from '@/components/motion/BodyMotion';
-import { Door } from '@/components/motion/Door';
 
 /**
  * The single immersive scroll:
@@ -36,9 +35,6 @@ export default function Page() {
           tall scroll track sits in normal flow above <main>, so the site simply
           follows it down the page. */}
       <KeyReveal />
-
-      {/* The literal door — parts once at the key → Anteroom crossing. */}
-      <Door />
 
       <SiteHeader />
       <main>

@@ -76,9 +76,10 @@ export function KeyReveal() {
   }, []);
 
   // Map reveal progress → hint fade + done. NO wash-to-bone (spec §3.3): the dark
-  // holds through the pass-through and the literal door parts into the Anteroom.
-  // Once the camera has passed through the key, the stage fades out (opacity, via
-  // data-done) onto the dark hero beneath and releases pointer events.
+  // holds through the pass-through, and the travelling light + "light enters first"
+  // carry the crossing into the Anteroom. Once the camera has passed through the
+  // key, the stage fades out (opacity, via data-done) onto the dark hero beneath
+  // and releases pointer events.
   const onProgress = (p: number) => {
     if (hintRef.current) {
       hintRef.current.style.opacity = String(Math.max(0, 1 - p / 0.22));
@@ -93,8 +94,8 @@ export function KeyReveal() {
   const scrubbed = mounted && webgl === true && !reduce;
 
   // The #key-track jumps from 0 → 320vh once `scrubbed` resolves, shifting every
-  // section down. ScrollTrigger computed all body trigger points (the spine, the
-  // room entrances, the door) against the short document, so refresh once the
+  // section down. ScrollTrigger computed all body trigger points (the spine and
+  // the room entrances) against the short document, so refresh once the
   // track height has settled (next frame, after layout) to re-pin them.
   useEffect(() => {
     const id = requestAnimationFrame(() => ScrollTrigger.refresh());

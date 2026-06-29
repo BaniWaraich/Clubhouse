@@ -8,7 +8,7 @@ import { ROOM_BG } from '@/lib/palette';
  * The admittance spine — the cinematic body choreography (spec §3.3).
  *
  * One orchestrator, mounted once, reading the EXISTING DOM (section ids,
- * `[data-copy]`, `.triplet`, `.spine`, `.door`). It adds no markup; it only
+ * `[data-copy]`, `.triplet`, `.spine`). It adds no markup; it only
  * animates CSS custom properties and transform/opacity/clip-path. It rides the
  * single Lenis RAF — every trigger scrubs/plays directly off the already-smoothed
  * scroll position, so there is no second RAF loop and no second smoother.
@@ -26,15 +26,16 @@ import { ROOM_BG } from '@/lib/palette';
  *      gesture.
  *   5. THE ROOM TO COME — a thin line of light (`--ajar-open`) widens, the door
  *      left ajar.
- *   6. THE DOOR — at the key → Anteroom crossing, the dark parts like two panels.
+ *
+ * The key → Anteroom crossing relies on the travelling light + "light enters
+ * first" alone — no literal door.
  *
  * Degradation:
  *   - reduced-motion → nothing runs; `[data-motion]` is never set, so the rooms
  *     keep their opaque static backgrounds and every `--enter`/`--ajar-open`
  *     default of 1 leaves the page a clean, fully-lit composed document.
- *   - mobile (< 60rem) → the same gestures minus the door (no full-screen panel
- *     on a small touch viewport); no pins are used anywhere, so native scroll is
- *     preserved.
+ *   - mobile (< 60rem) → the same gestures; no pins are used anywhere, so native
+ *     scroll is preserved.
  */
 
 type Room = { id: string; color: string };
@@ -60,13 +61,9 @@ export function BodyMotion() {
     mm.add(
       {
         motion: '(prefers-reduced-motion: no-preference)',
-        desktop: '(min-width: 60rem)',
       },
       (ctx) => {
-        const { motion, desktop } = ctx.conditions as {
-          motion: boolean;
-          desktop: boolean;
-        };
+        const { motion } = ctx.conditions as { motion: boolean };
         if (!motion) return; // reduced-motion: leave the static composed page
 
         // Live choreography → rooms go transparent so the travelling light reads
@@ -253,31 +250,6 @@ export function BodyMotion() {
             tl.to(section, { '--ajar-open': 1, duration: 1.8, ease: 'power2.inOut' }, 0);
             tl.to(items, { ...SHOWN, duration: 1.1, stagger: 0.12 }, 0.5);
           }
-        }
-
-        /* ---- 6. The literal door — desktop only, the key → Anteroom crossing ---- */
-        const door = document.querySelector<HTMLElement>('.door');
-        const anteroom = document.getElementById('the-idea');
-        if (desktop && door && anteroom) {
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: anteroom,
-              start: 'top 80%',
-              end: 'top 18%',
-              scrub: 0.5,
-              onToggle: (self) =>
-                door.style.setProperty('--door-display', self.isActive ? 'block' : 'none'),
-            },
-          });
-          // a brass seam of light grows down the centre of the held dark…
-          tl.fromTo(
-            door,
-            { '--door': 0, '--door-seam': 0 },
-            { '--door-seam': 1, duration: 0.4, ease: 'power2.out' },
-            0,
-          );
-          // …then the two panels part and you step through into the Anteroom.
-          tl.to(door, { '--door': 1, duration: 0.6, ease: EASE_LUXE }, 0.4);
         }
 
         // Recompute once webfonts settle (metrics shift heights / trigger points).

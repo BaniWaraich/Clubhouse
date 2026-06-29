@@ -120,9 +120,8 @@ layer parallax. Keep that vocabulary. **No second RAF loop.**
   room illuminate as you cross in.
 - **Per-room accents:**
   - *Threshold → Anteroom:* retune the handoff — the key's backlight *becomes* the
-    Anteroom's light (seamless dark, **no wash to bone**). Plus **a literal door** —
-    the dark parts like two panels and you step through. Reserved for **this one
-    crossing only**, so it keeps its weight.
+    Anteroom's light (seamless dark, **no wash to bone**). The crossing rides the
+    travelling light and "light enters first" alone — no literal door.
   - *Hearth:* the mono triplet and the number **print in** (dial / type line by
     line); the brass glow swells once. The only "loud" motion on the page.
   - *The Quiet:* near-zero motion. Stillness *is* the gesture; the room holds its
@@ -170,8 +169,8 @@ sensible default-off signal.
   **backlit** (light from behind/through it); the persistent `Scene`/`Atmosphere`
   starts dark and becomes the source the travelling light grows from; the scene is
   re-graded warm-dark; and the handoff **drops the wash-to-bone** — the dark holds
-  and the literal door parts into the Anteroom (the key's backlight becomes the
-  Anteroom's light). This touches `KeyCanvas` (lighting rig / environment / tone
+  into the Anteroom (the key's backlight becomes the Anteroom's light), carried by
+  the travelling light alone. This touches `KeyCanvas` (lighting rig / environment / tone
   mapping / bloom), `KeyReveal` (background field, remove the bone wash, handoff,
   hint colours), and `Scene` + `Atmosphere` (dark background + glow). `KeyModel`
   geometry and material identity stay. Re-lighting is subjective → **visual sign-off
@@ -198,8 +197,8 @@ sensible default-off signal.
 2. **Warm shell** — repalette tokens + rebuild the six rooms as full-bleed warm
    rooms using gradient/texture placeholders; swap in the new type. Looks finished
    with zero photos.
-3. **Motion** — the travelling-light spine, "light enters first," the literal door,
-   the Hearth number print-in, the Quiet's stillness; retune the key handoff.
+3. **Motion** — the travelling-light spine, "light enters first," the Hearth number
+   print-in, the Quiet's stillness; retune the key handoff.
 4. **Imagery** — drop warm, abstract photography behind the existing treatment.
 5. **Detail + fallbacks** — ambient-audio toggle, reduced-motion / mobile passes,
    performance.
@@ -212,8 +211,9 @@ sensible default-off signal.
 - Full scroll renders the dark → light admittance arc: backlit key, warm-dark held
   through the Hearth and the Quiet, light arriving at the door-ajar and full at The
   Book.
-- The literal door plays once at the key→Anteroom crossing; "light enters first" on
-  every room; the number prints in at the Hearth; the Quiet is near-still.
+- The key→Anteroom crossing is carried by the travelling light alone (no literal
+  door); "light enters first" on every room; the number prints in at the Hearth;
+  the Quiet is near-still.
 - Type is Newsreader + IBM Plex Mono with brass (not italic) emphasis; no italics
   used for emphasis anywhere.
 - Ambient audio is off by default, toggles, and remembers the choice.
