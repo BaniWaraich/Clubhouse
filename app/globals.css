@@ -1123,11 +1123,27 @@ html[data-motion] .footer {
    light (high-key portrait) and air (already --bleed/wide) are left untouched,
    as is every desktop size. */
 @media (max-width: 59.999rem) {
+  /* The 12-col grid collapses to one column, so source order would otherwise
+     decide stacking — and .chapter--right keeps copy first in source (for
+     desktop reading order), making one section lead with text while the others
+     lead with the image. Force every chapter to the same rhythm on mobile:
+     image first, then copy. `order` is visual-only, so the source reading order
+     (good for assistive tech) is preserved. */
+  .chapter__media {
+    order: 1;
+  }
+  .chapter__copy {
+    order: 2;
+  }
+
+  /* Unify the plates on mobile: each keeps its own ratio (portrait/square) but
+     is height-capped and centred so none towers over the viewport and all three
+     read at a consistent scale. */
+  .plate--light,
   .plate--shaft,
   .plate--shadow {
-    --plate-ratio: 3 / 2;
-    max-height: 42vh;
-    max-width: 30rem;
+    max-height: 56vh;
+    max-width: 28rem;
     margin-inline: auto;
   }
 }
