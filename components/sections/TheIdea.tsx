@@ -15,7 +15,7 @@ export function TheIdea() {
       <SectionIndex numeral="I" />
       <div className="chapter chapter--left">
         <div className="chapter__media">
-          <Plate variant="light" ratio="portrait" />
+          <Plate variant="light" ratio="portrait" src="/img/idea.jpg" />
         </div>
         <div className="chapter__copy">
           <p className="kicker" data-copy>

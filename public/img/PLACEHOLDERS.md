@@ -1,20 +1,23 @@
-# Chapter imagery — Phase 2
+# Chapter imagery
 
-This directory is intentionally empty in Phase 1 (the chapters render graded
-CSS-gradient placeholders via `<Plate>`; no binaries are committed).
+Three rooms carry a treated media plate, each holding a warm, dark, atmospheric
+photograph passed to `<Plate src>`. The image sits behind the duotone treatment
+veil (`.plate--media .plate__treatment`) + grain + edge feather, which grade it
+to the palette and dissolve its edges into the room. Each plate reserves its
+aspect-ratio, so swapping assets causes **no relayout**.
 
-Phase 2 drops the real photographs here and passes their paths to `<Plate src>`
-(wired through `next/image`, behind the existing duotone treatment layer). Each
-plate already reserves its aspect-ratio, so adding the images causes **no
-relayout**.
+| File             | Chapter        | Subject (variant / ratio)              |
+| ---------------- | -------------- | -------------------------------------- |
+| `idea.jpg`       | The Idea       | club interior still (light / portrait) |
+| `one-number.jpg` | The One Number | vintage telephone (shaft / portrait)   |
+| `discretion.jpg` | Discretion     | wax-sealed envelope (shadow / square)  |
 
-Expected filenames (one per chapter):
+All three are web-optimised (long edge ≤ 1600px, ~80% JPEG).
 
-| File             | Chapter        | Plate variant / ratio |
-| ---------------- | -------------- | --------------------- |
-| `idea.jpg`       | The Idea       | light / portrait      |
-| `one-number.jpg` | The One Number | shaft / portrait      |
-| `discretion.jpg` | Discretion     | shadow / square       |
-| `club.jpg`       | The Club to Come | air / wide (bleed)  |
+**Guardrail note:** `idea.jpg` is a venue/interior, which the spec §4 constraint
+("no venue content; never show a building/amenity") normally forbids. It is used
+by explicit owner decision (Phase 4) — see `.buildlog/phase-4.md`. The One Number
+and Discretion are object still-lifes and within the guardrails.
 
-The Invitation section uses no photograph (a hairline framing element only).
+The Club to Come and the Invitation use no plate (a thin line of light / a
+hairline framing only).
