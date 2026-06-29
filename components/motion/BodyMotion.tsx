@@ -2,141 +2,274 @@
 
 import { useGSAP } from '@gsap/react';
 import { gsap, ScrollTrigger, EASE_LUXE } from '@/lib/gsap';
+import { ROOM_BG } from '@/lib/palette';
 
 /**
- * Body choreography — the cinematic spine of the scroll.
+ * The admittance spine — the cinematic body choreography (spec §3.3).
  *
- * One orchestrator, mounted once, that reads the EXISTING DOM (`.chapter`,
- * `.chapter__media .plate`, `.chapter__copy`, `[data-copy]`, section ids). It adds
- * no markup and never touches the duotone/feather plate system, the form, or the
- * Plate API — it only animates transform / clip-path / opacity.
+ * One orchestrator, mounted once, reading the EXISTING DOM (section ids,
+ * `[data-copy]`, `.triplet`, `.spine`, `.door`). It adds no markup; it only
+ * animates CSS custom properties and transform/opacity/clip-path. It rides the
+ * single Lenis RAF — every trigger scrubs/plays directly off the already-smoothed
+ * scroll position, so there is no second RAF loop and no second smoother.
  *
- * It rides the single Lenis RAF: every trigger here scrubs DIRECTLY off the
- * already-smoothed scroll position (exactly like KeyCanvas), so there is no second
- * smoothing layer and no second requestAnimationFrame loop. All GSAP is created
- * inside useGSAP's context (auto-reverted on unmount) via gsap.matchMedia(), which
- * reverts each branch when its query stops matching (resize between mobile/desktop
- * and the reduced-motion switch are handled for free).
- *
- * Per body chapter, on the pinned + scrubbed timeline:
- *   1. the plate UNMASKS upward via clip-path inset() while it eases from a slight
- *      scale (1.06 → 1) and a small y — the image-reveal move, not a fade;
- *   2. the copy lines STAGGER in on the same timeline, in the Reveal/SplitText clip
- *      vocabulary (inset unmask + rise), so the motion language stays singular;
- *   3. plate and copy DRIFT at different rates (a quiet vertical parallax) so the
- *      layers read as depth across the pin.
+ * Gestures:
+ *   1. TRAVELLING LIGHT — `.spine`'s background colour is driven continuously
+ *      from near-black through the six ROOM_BG values to full warm light, each
+ *      transition anchored between consecutive room centres so the light never
+ *      dies between rooms.
+ *   2. LIGHT ENTERS FIRST — each room's warm vignette (`--enter`) blooms out of
+ *      the dark as you cross in, just BEFORE its words resolve (copy stagger).
+ *   3. THE HEARTH — the mono triplet prints in line by line and the glow swells
+ *      once; the only "loud" motion on the page.
+ *   4. THE QUIET — near-zero motion; copy only breathes in. Stillness is the
+ *      gesture.
+ *   5. THE ROOM TO COME — a thin line of light (`--ajar-open`) widens, the door
+ *      left ajar.
+ *   6. THE DOOR — at the key → Anteroom crossing, the dark parts like two panels.
  *
  * Degradation:
- *   - reduced-motion → no branch runs; plain elements render in their final,
- *     composed state (the page is a clean static document);
- *   - mobile (< 60rem) → no pin/scrub (janky on touch); the same clip-path reveal
- *     and a light enter-stagger play on scroll-in, native-feel scroll preserved.
+ *   - reduced-motion → nothing runs; `[data-motion]` is never set, so the rooms
+ *     keep their opaque static backgrounds and every `--enter`/`--ajar-open`
+ *     default of 1 leaves the page a clean, fully-lit composed document.
+ *   - mobile (< 60rem) → the same gestures minus the door (no full-screen panel
+ *     on a small touch viewport); no pins are used anywhere, so native scroll is
+ *     preserved.
  */
 
-type Chapter = { id: string; air?: boolean };
+type Room = { id: string; color: string };
 
-const BODY: readonly Chapter[] = [
-  { id: 'the-idea' },
-  { id: 'the-one-number' },
-  { id: 'discretion' },
-  { id: 'the-club-to-come', air: true }, // the one bigger breath
+// Scroll order = spec §3.1. The hero IS the Threshold room.
+const ROOMS: readonly Room[] = [
+  { id: 'hero', color: ROOM_BG.threshold },
+  { id: 'the-idea', color: ROOM_BG.anteroom },
+  { id: 'the-one-number', color: ROOM_BG.hearth },
+  { id: 'discretion', color: ROOM_BG.quiet },
+  { id: 'the-club-to-come', color: ROOM_BG.ajar },
+  { id: 'invitation', color: ROOM_BG.book },
 ];
 
-const PLATE_HIDDEN = { clipPath: 'inset(0 0 100% 0)' as const };
-const PLATE_SHOWN = { clipPath: 'inset(0 0 0% 0)' as const };
+const HIDDEN = { y: 24, opacity: 0, clipPath: 'inset(0 0 100% 0)' } as const;
+const SHOWN = { y: 0, opacity: 1, clipPath: 'inset(0 0 0% 0)' } as const;
 
 export function BodyMotion() {
   useGSAP(() => {
     const mm = gsap.matchMedia();
+    const root = document.documentElement;
 
-    /* ---- Desktop: pinned, scrubbed cinematic chapters ---- */
-    mm.add('(min-width: 60rem) and (prefers-reduced-motion: no-preference)', () => {
-      BODY.forEach(({ id, air }) => {
-        const section = document.getElementById(id);
-        const chapter = section?.querySelector<HTMLElement>('.chapter');
-        const plate = section?.querySelector<HTMLElement>('.plate');
-        const media = section?.querySelector<HTMLElement>('.chapter__media');
-        const copy = section?.querySelector<HTMLElement>('.chapter__copy');
-        if (!chapter || !plate || !media || !copy) return;
-        const items = copy.querySelectorAll<HTMLElement>('[data-copy]');
+    mm.add(
+      {
+        motion: '(prefers-reduced-motion: no-preference)',
+        desktop: '(min-width: 60rem)',
+      },
+      (ctx) => {
+        const { motion, desktop } = ctx.conditions as {
+          motion: boolean;
+          desktop: boolean;
+        };
+        if (!motion) return; // reduced-motion: leave the static composed page
 
-        // Pre-states set in this same layout-effect pass — before paint, so no
-        // flash; if JS never ran the markup would simply show (CSS holds nothing).
-        gsap.set(plate, { ...PLATE_HIDDEN, scale: air ? 1.1 : 1.06, yPercent: 4 });
-        gsap.set(items, { ...PLATE_HIDDEN, yPercent: 60, opacity: 0 });
+        // Live choreography → rooms go transparent so the travelling light reads
+        // through them as one continuous field.
+        root.dataset.motion = 'on';
 
-        const willOn = (active: boolean) =>
-          gsap.set([plate, ...items], {
-            willChange: active ? 'clip-path, transform, opacity' : 'auto',
+        /* ---- 1. The travelling light: one deterministic interpolation across
+                the six room centres (no competing tweens on one property). ---- */
+        const spine = document.querySelector<HTMLElement>('.spine');
+        if (spine) {
+          const els = ROOMS.map((r) => document.getElementById(r.id));
+          // precompute the interpolators between consecutive room colours
+          const lerps = ROOMS.slice(0, -1).map((r, i) =>
+            gsap.utils.interpolate(r.color, ROOMS[i + 1].color),
+          );
+          // Where in each room the spine should equal that room's colour. Most
+          // rooms anchor at their centre; The Book (invitation) anchors near its
+          // top — its centre sits past the reachable scroll, and the spec wants
+          // full warm light to arrive AS the form enters, not at the very bottom.
+          const ANCHOR = [0.5, 0.5, 0.5, 0.5, 0.5, 0.22];
+          let centres: number[] = [];
+          let measuredAt = -1;
+          const measure = (scroll: number) => {
+            // document-absolute anchors (offsetTop is relative to <main>, which
+            // sits below the 320vh key-track — so use the rect + live scroll).
+            centres = els.map((el, i) => {
+              if (!el) return 0;
+              const r = el.getBoundingClientRect();
+              return r.top + scroll + r.height * ANCHOR[i];
+            });
+            // Re-measure when the document height changes — the KeyReveal track
+            // starts at 0 and grows to 320vh after WebGL detection resolves, which
+            // shifts every room down without firing a ScrollTrigger refresh.
+            measuredAt = document.documentElement.scrollHeight;
+          };
+
+          ScrollTrigger.create({
+            trigger: document.documentElement,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: true,
+            onRefresh: (self) => measure(self.scroll()),
+            onUpdate: (self) => {
+              const scroll = self.scroll();
+              if (!centres.length || document.documentElement.scrollHeight !== measuredAt) {
+                measure(scroll);
+              }
+              // compare the document coordinate at the VIEWPORT CENTRE against the
+              // room centres, so the spine equals a room's colour when that room
+              // is centred on screen.
+              const y = scroll + window.innerHeight / 2;
+              // hold the end colours before the first / after the last centre
+              if (y <= centres[0]) {
+                spine.style.backgroundColor = ROOMS[0].color;
+                return;
+              }
+              const last = centres.length - 1;
+              if (y >= centres[last]) {
+                spine.style.backgroundColor = ROOMS[last].color;
+                return;
+              }
+              for (let i = 0; i < last; i++) {
+                if (y >= centres[i] && y < centres[i + 1]) {
+                  const t = (y - centres[i]) / (centres[i + 1] - centres[i]);
+                  spine.style.backgroundColor = lerps[i](t);
+                  return;
+                }
+              }
+            },
           });
+        }
 
-        const tl = gsap.timeline({
-          defaults: { ease: EASE_LUXE },
-          scrollTrigger: {
-            trigger: chapter,
-            // pin when the chapter is framed centre-screen — the "room" holds,
-            // the choreography scrubs across the pin, then releases to the next.
-            start: 'center center',
-            // short, tasteful holds; the air landscape gets a touch longer.
-            end: () => '+=' + Math.round(window.innerHeight * (air ? 1.05 : 0.7)),
-            pin: chapter,
-            pinSpacing: true,
-            anticipatePin: 1,
-            scrub: 0.6,
-            invalidateOnRefresh: true,
-            onToggle: (self) => willOn(self.isActive),
-          },
-        });
+        /* ---- 2–5. Per-room entrances ---- */
+        const enter = (id: string) => {
+          const section = document.getElementById(id);
+          if (!section) return null;
+          const copy = section.querySelector<HTMLElement>('.chapter__copy') ?? section;
+          const items = gsap.utils.toArray<HTMLElement>(
+            copy.querySelectorAll('[data-copy]'),
+          );
+          gsap.set(section, { '--enter': 0 });
+          return { section, items };
+        };
 
-        // 1 — plate unmask + settle
-        tl.to(plate, { ...PLATE_SHOWN, scale: 1, yPercent: 0, duration: 1 }, 0);
-        // 2 — copy lines stagger in on the same timeline (Reveal clip language)
-        tl.to(
-          items,
-          { ...PLATE_SHOWN, yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.12 },
-          0.1,
-        );
-        // 3 — intra-chapter parallax: layers drift at different rates across the pin
-        tl.to(media, { yPercent: air ? -6 : -10, duration: 1, ease: 'none' }, 0);
-        tl.to(copy, { yPercent: air ? 4 : 8, duration: 1, ease: 'none' }, 0);
-      });
-    });
+        // The Idea (Anteroom) — light blooms, then words resolve.
+        {
+          const r = enter('the-idea');
+          if (r) {
+            gsap.set(r.items, HIDDEN);
+            const tl = gsap.timeline({
+              defaults: { ease: EASE_LUXE },
+              scrollTrigger: { trigger: r.section, start: 'top 78%' },
+            });
+            tl.to(r.section, { '--enter': 1, duration: 1.1 }, 0);
+            tl.to(r.items, { ...SHOWN, duration: 1.1, stagger: 0.12 }, 0.28);
+          }
+        }
 
-    /* ---- Mobile: no pin/scrub — clip reveal + light enter stagger ---- */
-    mm.add('(max-width: 59.999rem) and (prefers-reduced-motion: no-preference)', () => {
-      BODY.forEach(({ id }) => {
-        const section = document.getElementById(id);
-        const plate = section?.querySelector<HTMLElement>('.plate');
-        const copy = section?.querySelector<HTMLElement>('.chapter__copy');
-        if (!plate || !copy) return;
-        const items = copy.querySelectorAll<HTMLElement>('[data-copy]');
+        // The Hearth — glow swell + the triplet prints in (the one loud moment).
+        {
+          const section = document.getElementById('the-one-number');
+          const copy = section?.querySelector<HTMLElement>('.chapter__copy');
+          if (section && copy) {
+            const tripletWrap = copy.querySelector<HTMLElement>('.triplet')?.closest<HTMLElement>('[data-copy]');
+            const lines = gsap.utils.toArray<HTMLElement>(
+              copy.querySelectorAll('[data-copy]'),
+            ).filter((el) => el !== tripletWrap);
+            const cells = gsap.utils.toArray<HTMLElement>(
+              copy.querySelectorAll('.triplet span'),
+            );
+            gsap.set(section, { '--enter': 0 });
+            gsap.set(lines, HIDDEN);
+            if (tripletWrap) gsap.set(tripletWrap, { opacity: 0 });
+            gsap.set(cells, { clipPath: 'inset(0 100% 0 0)', opacity: 0 });
 
-        gsap.set(plate, { ...PLATE_HIDDEN, scale: 1.04 });
-        gsap.set(items, { ...PLATE_HIDDEN, y: 24, opacity: 0 });
+            const tl = gsap.timeline({
+              defaults: { ease: EASE_LUXE },
+              scrollTrigger: { trigger: section, start: 'top 76%' },
+            });
+            // glow swells once (a touch slower, warmer — see CSS .room--hearth)
+            tl.to(section, { '--enter': 1, duration: 1.4 }, 0);
+            tl.to(lines, { ...SHOWN, duration: 1.1, stagger: 0.12 }, 0.3);
+            if (tripletWrap) tl.to(tripletWrap, { opacity: 1, duration: 0.6 }, 0.9);
+            // the triplet prints in, cell by cell, like a dial / ledger line
+            tl.to(
+              cells,
+              {
+                clipPath: 'inset(0 0% 0 0)',
+                opacity: 1,
+                duration: 0.5,
+                stagger: 0.18,
+                ease: 'power2.out',
+              },
+              1.0,
+            );
+          }
+        }
 
-        gsap.to(plate, {
-          ...PLATE_SHOWN,
-          scale: 1,
-          duration: 1.2,
-          ease: EASE_LUXE,
-          scrollTrigger: { trigger: section, start: 'top 80%' },
-        });
-        gsap.to(items, {
-          ...PLATE_SHOWN,
-          y: 0,
-          opacity: 1,
-          duration: 1.1,
-          ease: EASE_LUXE,
-          stagger: 0.1,
-          scrollTrigger: { trigger: section, start: 'top 78%' },
-        });
-      });
-    });
+        // The Quiet — near-zero motion: copy only breathes in, no rise, no clip.
+        {
+          const r = enter('discretion');
+          if (r) {
+            gsap.set(r.items, { opacity: 0 });
+            const tl = gsap.timeline({
+              defaults: { ease: 'none' },
+              scrollTrigger: { trigger: r.section, start: 'top 72%' },
+            });
+            tl.to(r.section, { '--enter': 1, duration: 2.0 }, 0);
+            tl.to(r.items, { opacity: 1, duration: 1.8, stagger: 0.2 }, 0.4);
+          }
+        }
 
-    // Recompute pins once webfonts settle (metrics shift line wraps / heights).
-    if (typeof document !== 'undefined' && 'fonts' in document) {
-      document.fonts.ready.then(() => ScrollTrigger.refresh());
-    }
+        // The Room to come — a thin line of light widens (the door left ajar).
+        {
+          const section = document.getElementById('the-club-to-come');
+          const copy = section?.querySelector<HTMLElement>('.chapter__copy');
+          if (section) {
+            const items = gsap.utils.toArray<HTMLElement>(
+              (copy ?? section).querySelectorAll('[data-copy]'),
+            );
+            gsap.set(section, { '--enter': 0, '--ajar-open': 0 });
+            gsap.set(items, HIDDEN);
+            const tl = gsap.timeline({
+              defaults: { ease: EASE_LUXE },
+              scrollTrigger: { trigger: section, start: 'top 76%' },
+            });
+            tl.to(section, { '--enter': 1, duration: 1.2 }, 0);
+            tl.to(section, { '--ajar-open': 1, duration: 1.8, ease: 'power2.inOut' }, 0);
+            tl.to(items, { ...SHOWN, duration: 1.1, stagger: 0.12 }, 0.5);
+          }
+        }
+
+        /* ---- 6. The literal door — desktop only, the key → Anteroom crossing ---- */
+        const door = document.querySelector<HTMLElement>('.door');
+        const anteroom = document.getElementById('the-idea');
+        if (desktop && door && anteroom) {
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: anteroom,
+              start: 'top 80%',
+              end: 'top 18%',
+              scrub: 0.5,
+              onToggle: (self) =>
+                door.style.setProperty('--door-display', self.isActive ? 'block' : 'none'),
+            },
+          });
+          // a brass seam of light grows down the centre of the held dark…
+          tl.fromTo(
+            door,
+            { '--door': 0, '--door-seam': 0 },
+            { '--door-seam': 1, duration: 0.4, ease: 'power2.out' },
+            0,
+          );
+          // …then the two panels part and you step through into the Anteroom.
+          tl.to(door, { '--door': 1, duration: 0.6, ease: EASE_LUXE }, 0.4);
+        }
+
+        // Recompute once webfonts settle (metrics shift heights / trigger points).
+        if ('fonts' in document) {
+          document.fonts.ready.then(() => ScrollTrigger.refresh());
+        }
+      },
+    );
   });
 
   return null;

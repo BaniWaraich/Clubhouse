@@ -255,14 +255,144 @@ a {
 .site-atmosphere {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: 1; /* above the travelling-light spine, below content */
   pointer-events: none;
 }
 
 main,
 .footer {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+/* ---------- Phase 3: the travelling light (spine) ---------- */
+
+/* One continuous fixed background that the spine tween drives from near-black
+   through the six room values to full warm light across the whole scroll
+   (spec §3.3). It always exists behind everything; when motion is OFF the
+   opaque per-room section backgrounds simply cover it, so reduced-motion /
+   no-JS still renders the correct static arc (the Phase 2 fallback). */
+.spine {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #100b07; /* Threshold — the spine tween takes it from here */
+}
+
+/* When the choreography is live, the rooms go transparent so the single
+   travelling light reads through them as one continuous, never-dying field. */
+html[data-motion] .section,
+html[data-motion] .hero,
+html[data-motion] .footer {
+  background-color: transparent;
+}
+
+/* "Light enters first" (spec §3.3) — a warm vignette blooms out of the dark as
+   you cross into each room, BEFORE the words resolve into it. The bloom opacity
+   is driven by --enter (0 → 1), which BodyMotion animates on room entry; it
+   defaults to 1 so a static/no-JS page shows each room already lit. */
+.section::before,
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--enter, 1);
+  background: radial-gradient(
+    120% 90% at 30% 24%,
+    rgba(232, 200, 121, 0.1) 0%,
+    rgba(216, 174, 87, 0.04) 34%,
+    transparent 70%
+  );
+}
+
+/* light rooms get a cooler, paler bloom so it never muddies the paper */
+.room--ajar::before,
+.room--book::before {
+  background: radial-gradient(
+    120% 90% at 30% 24%,
+    rgba(255, 252, 244, 0.5) 0%,
+    rgba(246, 245, 241, 0.18) 40%,
+    transparent 72%
+  );
+}
+
+/* (content already sits above the ::before bloom: the existing
+   `.section > *:not(.section__index)` and `.hero__content` rules carry z-index:1,
+   while the bloom and the faint numeral sit at z-index:0.) */
+
+/* The Hearth's one-time glow swell rides the same --enter var with a stronger,
+   warmer pool centred on the copy. */
+.room--hearth::before {
+  background: radial-gradient(
+    90% 80% at 26% 38%,
+    rgba(232, 200, 121, 0.22) 0%,
+    rgba(216, 174, 87, 0.08) 38%,
+    transparent 72%
+  );
+}
+
+/* The Room Not Yet Built — a thin line of light that widens (spec §3.3): the
+   media is clipped to a centre slit and BodyMotion eases it open, the door
+   left ajar. --ajar-open defaults to 1 so static/no-JS shows the full plate. */
+.room--ajar .chapter__media {
+  clip-path: inset(0 calc((1 - var(--ajar-open, 1)) * 50%) 0);
+}
+
+/* ---------- Phase 3: the literal door (key → Anteroom) ---------- */
+
+/* Two near-black panels that part horizontally exactly once, at the crossing
+   from the key into the Anteroom — reserved for this one moment so it keeps its
+   weight. Fixed and above the content but below the header; --door (0 → 1)
+   drives the parting and is set by BodyMotion off the same scroll. Inert and
+   invisible once open or when motion is off. */
+.door {
+  position: fixed;
+  inset: 0;
+  z-index: 38;
+  pointer-events: none;
+  display: var(--door-display, none);
+}
+
+.door__panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 51%;
+  background: linear-gradient(180deg, #0d0906 0%, #140f0a 100%);
+  will-change: transform;
+}
+
+.door__panel--l {
+  left: 0;
+  transform: translateX(calc(var(--door, 0) * -100%));
+  box-shadow: 1px 0 24px rgba(0, 0, 0, 0.6);
+}
+
+.door__panel--r {
+  right: 0;
+  transform: translateX(calc(var(--door, 0) * 100%));
+  box-shadow: -1px 0 24px rgba(0, 0, 0, 0.6);
+}
+
+/* a thin brass seam of light down the centre where the panels meet */
+.door__seam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%) scaleY(var(--door-seam, 0));
+  transform-origin: center;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--brass-glow-hi) 50%,
+    transparent 100%
+  );
+  opacity: calc(1 - var(--door, 0));
 }
 
 /* section shell — vast vertical margins, content in a narrow offset measure.

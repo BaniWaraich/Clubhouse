@@ -142,7 +142,7 @@ export default function KeyCanvas({
         alpha: true,
         powerPreference: 'high-performance',
         toneMapping: AgXToneMapping,
-        toneMappingExposure: 1.12,
+        toneMappingExposure: 1.0,
       }}
       camera={{ position: [0, LOOK_Y, Z_START], fov: 35 }}
       style={{ position: 'absolute', inset: 0 }}
@@ -152,68 +152,65 @@ export default function KeyCanvas({
         onIncline={() => setDpr([1, 2])}
       />
 
-      {/* warm fill so the bone field reads behind the metal — lifted so shadowed
-          faces never collapse to brown (#1) */}
-      <ambientLight intensity={0.7} color="#fff6e6" />
-      {/* key light — warm, upper-right; softened from 2.0 to avoid hot speculars */}
-      <directionalLight position={[4, 5, 4]} intensity={1.9} color={PALETTE.brassWarm} />
-      {/* cool rim from behind-left to separate the key from the bone */}
-      <directionalLight position={[-5, 2, -3]} intensity={0.8} color={PALETTE.rimCool} />
-      {/* soft warm fill from the camera side so the flat bow face + incised disc
-          catch warm light instead of mirroring the dark backdrop behind the
-          camera (the disc read as a near-black pool otherwise) (#1) */}
-      <directionalLight position={[0, 1, 6]} intensity={0.55} color={PALETTE.brassWarm} />
+      {/* THE ADMITTANCE OPENING (spec §3.1): warm near-black, the key BACKLIT —
+          light comes from behind and through it. A low warm ambient keeps the
+          shadowed faces from dying to pure black; the dominant light sits BEHIND
+          the key so it rims and haloes toward the camera. */}
+      <ambientLight intensity={0.22} color="#e8c879" />
+      {/* the backlight — strong, warm, directly behind the key, throwing a brass
+          rim/halo forward (the sacred "light through the key"). */}
+      <directionalLight position={[0, 2, -5]} intensity={3.8} color="#e8c879" />
+      {/* a second, off-axis backlight for edge variation as it turns */}
+      <directionalLight position={[3, 1, -4]} intensity={1.6} color={PALETTE.brassWarm} />
+      {/* the faintest front fill so the bow face + incised initial are legible as
+          warm metal rather than a flat silhouette — kept low to hold the dark. */}
+      <directionalLight position={[0, 1, 6]} intensity={0.32} color={PALETTE.brassWarm} />
+      {/* cool rim from behind-left to separate the silhouette from the near-black */}
+      <directionalLight position={[-5, 2, -3]} intensity={0.5} color={PALETTE.rimCool} />
 
       {/* OFFLINE environment for metal reflections — inline emitters, no HDRI.
-          Two bright bars + a warm ring give the brass moving highlights as it
-          turns; a soft bone backdrop keeps reflections warm paper, not black. */}
+          A near-black surround with one bright warm panel BEHIND the key gives
+          the brass a backlit edge and a sweeping highlight as it turns; the metal
+          reflects warm-dark, not bone. */}
       <Environment resolution={256}>
+        {/* near-black surround — the room is dark */}
         <Lightformer
           form="rect"
-          intensity={3.4}
-          color={PALETTE.brassWarm}
-          position={[3, 4, 3]}
-          scale={[6, 4, 1]}
+          intensity={0.18}
+          color="#1a1208"
+          position={[0, 0, -6]}
+          scale={[14, 14, 1]}
         />
+        {/* the bright warm panel behind the key — the backlight source it rims off */}
         <Lightformer
           form="rect"
-          intensity={1.6}
-          color={PALETTE.base}
-          position={[-4, 1, 2]}
-          scale={[5, 9, 1]}
+          intensity={4.2}
+          color="#e8c879"
+          position={[0, 2, -4]}
+          scale={[4, 5, 1]}
         />
-        {/* a thin warm streak that sweeps across the metal as it rotates —
-            champagne, not white, so highlights stay brass (#1) */}
+        {/* a thin warm streak that sweeps across the metal as it rotates */}
         <Lightformer
           form="rect"
-          intensity={3.2}
+          intensity={2.6}
           color={PALETTE.brassWarm}
-          position={[0, 2, 4]}
+          position={[0, 1, 4]}
           scale={[0.3, 6, 1]}
         />
+        {/* a warm ring low and behind for a turned, candlelit reflection */}
         <Lightformer
           form="ring"
-          intensity={1.3}
+          intensity={1.1}
           color={PALETTE.brass}
-          position={[0, -3, 2]}
+          position={[0, -2, -2]}
           scale={[4, 4, 1]}
         />
-        {/* broad bone backdrop lifted so the metal reflects continuous warm paper
-            instead of black gaps that read as the brown body (#1) */}
+        {/* a very dim warm panel on the camera side so the bow face + incised disc
+            catch a trace of warm light instead of a dead black pool */}
         <Lightformer
           form="rect"
-          intensity={0.85}
-          color="#efe9dc"
-          position={[0, 0, -5]}
-          scale={[12, 12, 1]}
-        />
-        {/* front-side warm panel BEHIND the camera so the bow face + incised disc
-            (normals facing the camera) reflect warm paper instead of the empty
-            black hemisphere that read as a near-black pool (#1) */}
-        <Lightformer
-          form="rect"
-          intensity={0.6}
-          color={PALETTE.base}
+          intensity={0.28}
+          color={PALETTE.brassWarm}
           position={[0, 1, 7]}
           scale={[10, 10, 1]}
         />
@@ -229,11 +226,11 @@ export default function KeyCanvas({
           clean through the composer. */}
       <EffectComposer multisampling={4} enableNormalPass={false}>
         <Bloom
-          intensity={0.2}
-          luminanceThreshold={0.9}
-          luminanceSmoothing={0.2}
+          intensity={0.42}
+          luminanceThreshold={0.72}
+          luminanceSmoothing={0.32}
           mipmapBlur
-          radius={0.4}
+          radius={0.7}
         />
       </EffectComposer>
     </Canvas>

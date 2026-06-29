@@ -3,8 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { BRAND } from '@/lib/brand';
-import { prefersReducedMotion } from '@/lib/gsap';
-import { smoother as ease01 } from '@/lib/easings';
+import { ScrollTrigger, prefersReducedMotion } from '@/lib/gsap';
 
 /**
  * The site's ENTRANCE: a scroll-scrubbed brass-key reveal that plays over a
@@ -32,7 +31,8 @@ const KeyCanvas = dynamic(() => import('./KeyCanvas'), {
   loading: () => <KeyFallback />,
 });
 
-/** Designed bone field with a warm brass pool — the no-WebGL / loading poster. */
+/** Warm near-black field with the key's place lit by a backlit brass pool — the
+ *  no-WebGL / loading poster. Dark, sacred, never bone or blank. */
 function KeyFallback() {
   return (
     <div
@@ -41,9 +41,9 @@ function KeyFallback() {
         position: 'absolute',
         inset: 0,
         background:
-          'radial-gradient(60% 55% at 50% 46%, rgba(168,132,62,0.34), transparent 62%),' +
-          'radial-gradient(80% 70% at 50% 60%, rgba(168,132,62,0.12), transparent 70%),' +
-          'var(--base)',
+          'radial-gradient(46% 52% at 50% 44%, rgba(232,200,121,0.30), transparent 60%),' +
+          'radial-gradient(80% 70% at 50% 52%, rgba(168,132,62,0.12), transparent 72%),' +
+          '#100b07',
       }}
     />
   );
@@ -67,7 +67,6 @@ export function KeyReveal() {
   const [reduce, setReduce] = useState(false);
   const [done, setDone] = useState(false);
 
-  const washRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,15 +75,11 @@ export function KeyReveal() {
     setReduce(prefersReducedMotion());
   }, []);
 
-  // Map reveal progress → bone wash opacity + hint fade. Wash begins at 0.58,
-  // is full by 0.94; eased with smootherstep so the fade-to-bone has no hard
-  // start/stop and matches the eased camera/turn. Once full and progress is
-  // essentially complete, the stage releases pointer events so the site beneath
-  // is interactive.
+  // Map reveal progress → hint fade + done. NO wash-to-bone (spec §3.3): the dark
+  // holds through the pass-through and the literal door parts into the Anteroom.
+  // Once the camera has passed through the key, the stage fades out (opacity, via
+  // data-done) onto the dark hero beneath and releases pointer events.
   const onProgress = (p: number) => {
-    if (washRef.current) {
-      washRef.current.style.opacity = String(ease01((p - 0.58) / 0.36));
-    }
     if (hintRef.current) {
       hintRef.current.style.opacity = String(Math.max(0, 1 - p / 0.22));
     }
@@ -96,6 +91,15 @@ export function KeyReveal() {
   // reachable with native scroll; the stage shows a static composed frame/poster
   // and is non-interactive so it never traps the page.
   const scrubbed = mounted && webgl === true && !reduce;
+
+  // The #key-track jumps from 0 → 320vh once `scrubbed` resolves, shifting every
+  // section down. ScrollTrigger computed all body trigger points (the spine, the
+  // room entrances, the door) against the short document, so refresh once the
+  // track height has settled (next frame, after layout) to re-pin them.
+  useEffect(() => {
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh());
+    return () => cancelAnimationFrame(id);
+  }, [scrubbed]);
 
   // When the reveal isn't scrubbable (reduced-motion or no WebGL), the stage has
   // no scroll progress to ever set `done`, so it would cover the site forever.
@@ -119,7 +123,8 @@ export function KeyReveal() {
           pointerEvents: done ? 'none' : 'auto',
           opacity: done ? 0 : 1,
           transition: 'opacity 0.8s cubic-bezier(0.22,1,0.36,1)',
-          background: 'var(--base)',
+          // warm near-black — the sacred opening; the dark HOLDS (no bone wash).
+          background: '#100b07',
         }}
       >
         {scrubbed ? (
@@ -131,19 +136,6 @@ export function KeyReveal() {
         ) : (
           <KeyFallback />
         )}
-
-        {/* bone wash that bridges the pass-through into the site */}
-        <div
-          ref={washRef}
-          aria-hidden
-          style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'var(--base)',
-            opacity: 0,
-            pointerEvents: 'none',
-          }}
-        />
 
         {/* faint scroll hint, only when the reveal is actually scrubbable.
             Outer node carries the JS progress-fade; the inner layer breathes so
