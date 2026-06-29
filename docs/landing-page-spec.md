@@ -147,6 +147,9 @@ sensible default-off signal.
 
 - Never name hotel partners (Taj/IHCL, ITC, Oberoi) anywhere.
 - No restaurant / venue / amenity content; no lifestyle stock; no faces/members.
+  (Exception by owner decision, Phase 4: `The Idea` uses a dark club-interior
+  still — see `public/img/PLACEHOLDERS.md` / `.buildlog/phase-4.md`. The other
+  plates remain object still-lifes.)
 - No public pricing, tiers, or membership levels. CTA is always "Request an
   introduction," gated, with a referral field. The friction is the point.
 - Phase 2 stays a vague tease — no region, renderings, or dates.

@@ -5,9 +5,17 @@ the three plate rooms. Build + lint + tsc clean; verified headless (desktop +
 375px, no overflow, no console errors).
 
 ## Decision
-No photographs exist in the repo and the guardrails forbid places/partners/faces.
-With the user's sign-off, imagery is **generated** as abstract textures rather
-than sourced — smoke / silk in the candlelit register, graded to palette.
+First pass generated abstract textures (no assets existed). The owner then
+supplied real photographs, which replaced the textures:
+- `idea.jpg` — dark club interior. This is a VENUE shot, normally forbidden by
+  spec §4 ("no venue/amenity content"). Used by **explicit owner decision**
+  (overrides the guardrail for this one plate); recorded in spec §4 +
+  PLACEHOLDERS.md so it isn't reverted as a "fix".
+- `one-number.jpg` — vintage telephone still-life (the literal One Number).
+- `discretion.jpg` — wax-sealed envelope still-life (privacy).
+The One Number and Discretion stay within the object-still-life guardrail.
+All three web-optimised (≤1600px long edge, ~80% JPEG); the generated SVGs and
+oversized originals were removed.
 
 ## Files changed / added
 - `public/img/idea.svg`, `one-number.svg`, `discretion.svg` — inline-filter SVGs

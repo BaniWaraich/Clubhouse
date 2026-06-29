@@ -1,22 +1,23 @@
-# Chapter imagery — Phase 4
+# Chapter imagery
 
-Three rooms carry a treated media plate. Each holds a **generated, warm, abstract
-texture** (smoke / silk in the candlelit register) graded to the palette — never
-a place, partner, or face (a hard guardrail). They are passed to `<Plate src>`,
-which sits behind the duotone treatment veil (`.plate--media .plate__treatment`)
-and the grain; each plate reserves its aspect-ratio, so swapping assets causes
-**no relayout**.
+Three rooms carry a treated media plate, each holding a warm, dark, atmospheric
+photograph passed to `<Plate src>`. The image sits behind the duotone treatment
+veil (`.plate--media .plate__treatment`) + grain + edge feather, which grade it
+to the palette and dissolve its edges into the room. Each plate reserves its
+aspect-ratio, so swapping assets causes **no relayout**.
 
-| File                | Chapter        | Plate variant / ratio |
-| ------------------- | -------------- | --------------------- |
-| `idea.svg`          | The Idea       | light / portrait      |
-| `one-number.svg`    | The One Number | shaft / portrait      |
-| `discretion.svg`    | Discretion     | shadow / square       |
+| File             | Chapter        | Subject (variant / ratio)              |
+| ---------------- | -------------- | -------------------------------------- |
+| `idea.jpg`       | The Idea       | club interior still (light / portrait) |
+| `one-number.jpg` | The One Number | vintage telephone (shaft / portrait)   |
+| `discretion.jpg` | Discretion     | wax-sealed envelope (shadow / square)  |
 
-The textures are inline-filter SVGs (feTurbulence-based smoke + warm gradients),
-deterministic and tiny — no binaries, no network. To swap in real **abstract**
-photography later, drop a file here and point the room's `<Plate src>` at it; the
-treatment + grain + edge feather grade it to the room automatically.
+All three are web-optimised (long edge ≤ 1600px, ~80% JPEG).
+
+**Guardrail note:** `idea.jpg` is a venue/interior, which the spec §4 constraint
+("no venue content; never show a building/amenity") normally forbids. It is used
+by explicit owner decision (Phase 4) — see `.buildlog/phase-4.md`. The One Number
+and Discretion are object still-lifes and within the guardrails.
 
 The Club to Come and the Invitation use no plate (a thin line of light / a
 hairline framing only).
