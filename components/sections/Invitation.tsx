@@ -68,12 +68,12 @@ export function Invitation() {
   }
 
   return (
-    <section id="invitation" className="section section--exhale room--book">
+    <section id="invitation" className="section section--hold room--book">
       <SectionIndex numeral="V" />
       {/* a restrained light hairline framing the invitation — no heavy plate
           here; the form is the subject and is left entirely as-is (#fields,
           validation, and /api/enquiry wiring untouched) */}
-      <Reveal style={{ marginBottom: 'clamp(2rem, 5vh, 3rem)' }}>
+      <Reveal style={{ marginBottom: 'clamp(1.25rem, 3vh, 1.75rem)' }}>
         <hr className="hairline" style={{ maxWidth: '34ch' }} />
       </Reveal>
       <Reveal as="p" className="kicker">
@@ -85,7 +85,7 @@ export function Invitation() {
         as="p"
         className="subhead measure"
         delay={0.05}
-        style={{ marginTop: '2rem' }}
+        style={{ marginTop: '1.25rem' }}
       >
         Members extend introductions personally.
       </Reveal>
@@ -158,7 +158,7 @@ export function Invitation() {
               <textarea
                 id="message"
                 name="message"
-                rows={3}
+                rows={2}
                 value={values.message}
                 onChange={update('message')}
               />
@@ -184,7 +184,7 @@ export function Invitation() {
         as="p"
         className="refrain"
         delay={0.1}
-        style={{ marginTop: 'clamp(3.5rem, 8vh, 6rem)' }}
+        style={{ marginTop: 'clamp(2rem, 4vh, 3rem)' }}
       >
         You are expected.
       </Reveal>
