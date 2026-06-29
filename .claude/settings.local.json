@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(grep -rniE \"\\\\\\\\\\\\$|price|pricing|tier|per year|per month|membership fee\" app components)",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(curl -sS http://localhost:3000)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next-server\")",
+      "Bash(lsof -ti:3000,3001)",
+      "Bash(xargs kill -9)",
+      "Bash(curl -sS -X POST http://localhost:3000/api/enquiry -H \"Content-Type: application/json\" -d '{\"name\":\"Test Person\",\"email\":\"t@example.com\",\"referral\":\"A Member\"}' -w \"\\\\n%{http_code}\\\\n\")",
+      "Bash(curl -sS -X POST http://localhost:3000/api/enquiry -H \"Content-Type: application/json\" -d '{\"name\":\"\",\"email\":\"bad\",\"referral\":\"\"}' -w \"\\\\n%{http_code}\\\\n\")",
+      "Bash(npx tsc *)",
+      "Bash(echo \"=== exit $? ===\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3111/)",
+      "Bash(echo \"exit $?\")",
+      "Bash(echo \"tsc exit $?\")",
+      "Bash(npx eslint *)",
+      "Bash(echo \"eslint exit $?\")",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(gh repo *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s http://localhost:3210/_next/static/css/228663ab783a8c15.css)",
+      "Bash(lsof -ti:3210)",
+      "Bash(npx next *)",
+      "Bash(grep -rniE \"taj|ihcl| itc |oberoi|pricing|tier|\\\\\\\\\\\\$[0-9]\" components app)",
+      "Bash(node _shot.js)"
+    ]
+  }
+}

@@ -8,7 +8,6 @@ import { Discretion } from '@/components/sections/Discretion';
 import { TheClubToCome } from '@/components/sections/TheClubToCome';
 import { Invitation } from '@/components/sections/Invitation';
 import { Footer } from '@/components/sections/Footer';
-import { BodyMotion } from '@/components/motion/BodyMotion';
 
 /**
  * The single immersive scroll:
@@ -42,9 +41,12 @@ export default function Page() {
       </main>
       <Footer />
 
-      {/* Scroll-driven body choreography (pins, plate clip-reveal, parallax,
-          text stagger). Reads existing DOM; rides the single Lenis RAF. */}
-      <BodyMotion />
+      {/* Phase 2 (warm shell) renders as a clean static document — no body
+          choreography. The previous BodyMotion was tuned for the old bone layout
+          (pinned chapters + clip-path pre-hides) and glitched against this shell
+          (text overlap, jumpy pins). Phase 3 rebuilds motion fresh as the
+          "admittance" spine (travelling light, light-enters-first, the door) and
+          remounts here. components/motion/BodyMotion.tsx is kept for that rewrite. */}
     </>
   );
 }

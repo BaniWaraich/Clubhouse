@@ -42,3 +42,13 @@ zero JS/3D. Build + lint clean; verified visually (headless, JS-on and JS-off).
   renders the old bone atmosphere; `body` base is now `--candle` dark.
 - Header currently fixed off-white (readable on the dark top); Phase 3 may want
   it to shift colour with the travelling light.
+
+## Phase 2 review fix (post-commit)
+- Symptom on review: text overlap + jumpy transitions on scroll.
+- Cause: the committed `BodyMotion` (old bone-layout pins + clip-path pre-hides of
+  every `[data-copy]`) ran against the new shell — reveals fired out of sync and
+  pin spacing was computed for old heights.
+- Fix: unmounted `<BodyMotion />` (removed import + usage in `app/page.tsx`) so the
+  warm shell renders as the intended clean static document. `[data-copy]` has no
+  CSS hide, so all copy stays visible. `BodyMotion.tsx` kept for Phase 3 to rewrite.
+- Verified: `npm run lint` clean, `tsc --noEmit` clean.
