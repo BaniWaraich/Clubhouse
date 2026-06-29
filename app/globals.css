@@ -334,11 +334,34 @@ html[data-motion] .footer {
   );
 }
 
-/* The Room Not Yet Built — a thin line of light that widens (spec §3.3): the
-   media is clipped to a centre slit and BodyMotion eases it open, the door
-   left ajar. --ajar-open defaults to 1 so static/no-JS shows the full plate. */
-.room--ajar .chapter__media {
-  clip-path: inset(0 calc((1 - var(--ajar-open, 1)) * 50%) 0);
+/* The Room Not Yet Built — a near-empty, centred tease. No plate; just the copy
+   and a thin line of light that widens (spec §3.3 — the door left ajar). */
+.ajar {
+  max-width: var(--measure);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.ajar__lead {
+  margin-inline: auto;
+}
+
+/* the thin line of light — BodyMotion eases --ajar-open 0 → 1 to widen it from
+   the centre. Defaults to 1 so static / no-JS shows the full line. */
+.ajar__line {
+  display: block;
+  width: min(26rem, 60vw);
+  height: 1px;
+  margin: clamp(2.5rem, 6vh, 4rem) auto 0;
+  transform: scaleX(var(--ajar-open, 1));
+  transform-origin: center;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mark) 50%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px rgba(216, 174, 87, 0.35);
 }
 
 /* section shell — vast vertical margins, content in a narrow offset measure.
