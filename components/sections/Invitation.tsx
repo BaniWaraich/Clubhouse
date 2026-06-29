@@ -68,8 +68,14 @@ export function Invitation() {
   }
 
   return (
-    <section id="invitation" className="section section--exhale">
+    <section id="invitation" className="section section--exhale room--book">
       <SectionIndex numeral="V" />
+      {/* a restrained light hairline framing the invitation — no heavy plate
+          here; the form is the subject and is left entirely as-is (#fields,
+          validation, and /api/enquiry wiring untouched) */}
+      <Reveal style={{ marginBottom: 'clamp(2rem, 5vh, 3rem)' }}>
+        <hr className="hairline" style={{ maxWidth: '34ch' }} />
+      </Reveal>
       <Reveal as="p" className="kicker">
         Request an introduction
       </Reveal>
@@ -172,6 +178,16 @@ export function Invitation() {
           </form>
         </Reveal>
       )}
+
+      {/* the refrain closes the journey where it opened at the key (spec §2) */}
+      <Reveal
+        as="p"
+        className="refrain"
+        delay={0.1}
+        style={{ marginTop: 'clamp(3.5rem, 8vh, 6rem)' }}
+      >
+        You are expected.
+      </Reveal>
     </section>
   );
 }

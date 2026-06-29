@@ -9,13 +9,14 @@ import { BRAND } from '@/lib/brand';
  */
 export function Hero() {
   return (
-    <section id="hero" className="hero">
+    <section id="hero" className="hero room--dark room--threshold">
       {/* oversized, ultra-light initial that fills the right half and
           parallaxes on scroll — pure type, no canvas */}
       <HeroMark char={BRAND.name.charAt(0)} />
 
       <div className="hero__content">
-        <p className="kicker">By invitation</p>
+        {/* the refrain opens here and closes at the invitation (spec §2) */}
+        <p className="refrain">You are expected.</p>
         <h1 className="hero__masthead">
           <SplitText start="top 95%">{BRAND.name}</SplitText>
         </h1>

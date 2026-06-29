@@ -8,6 +8,7 @@ import { Discretion } from '@/components/sections/Discretion';
 import { TheClubToCome } from '@/components/sections/TheClubToCome';
 import { Invitation } from '@/components/sections/Invitation';
 import { Footer } from '@/components/sections/Footer';
+import { BodyMotion } from '@/components/motion/BodyMotion';
 
 /**
  * The single immersive scroll:
@@ -40,6 +41,10 @@ export default function Page() {
         <Invitation />
       </main>
       <Footer />
+
+      {/* Scroll-driven body choreography (pins, plate clip-reveal, parallax,
+          text stagger). Reads existing DOM; rides the single Lenis RAF. */}
+      <BodyMotion />
     </>
   );
 }
