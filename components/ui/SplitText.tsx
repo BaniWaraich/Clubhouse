@@ -59,6 +59,9 @@ export function SplitText({
         <span
           key={i}
           className="line"
+          // The wrapper's aria-label carries the phrase; hide the visual split
+          // spans so a screen reader announces it once, not character-by-line.
+          aria-hidden
           style={{ display: 'block', overflow: 'hidden', paddingBottom: '0.04em' }}
         >
           <span className="line-inner" style={{ display: 'block' }}>

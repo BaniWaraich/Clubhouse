@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Newsreader, Inter, IBM_Plex_Mono } from 'next/font/google';
 import { SmoothScrollProvider } from '@/components/providers/smooth-scroll';
 import { Grain } from '@/components/ui/Grain';
@@ -38,6 +38,13 @@ export const metadata: Metadata = {
   title: BRAND.name,
   description: BRAND.tagline,
   robots: { index: false, follow: false }, // pre-launch: keep out of search
+};
+
+// The admittance arc opens in the dark room; matching the browser chrome to
+// that near-black avoids a white flash of the mobile address bar on load.
+export const viewport: Viewport = {
+  themeColor: '#100b07',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

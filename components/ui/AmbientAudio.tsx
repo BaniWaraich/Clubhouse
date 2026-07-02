@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { prefersReducedMotion } from '@/lib/gsap';
 
 /**
  * A discreet, warm ambient bed and its single quiet toggle (spec §3.4).
@@ -158,7 +157,6 @@ export function AmbientAudio() {
 
   // reduced-motion default-off is handled above (we never auto-enable); the
   // control itself stays available so a visitor can still choose sound.
-  void prefersReducedMotion;
 
   return (
     <button
