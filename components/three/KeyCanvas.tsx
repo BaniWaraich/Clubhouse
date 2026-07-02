@@ -151,7 +151,7 @@ export default function KeyCanvas({
         alpha: true,
         powerPreference: 'high-performance',
         toneMapping: AgXToneMapping,
-        toneMappingExposure: 1.0,
+        toneMappingExposure: 1.06,
       }}
       camera={{ position: [0, LOOK_Y, Z_START], fov: 35 }}
       style={{ position: 'absolute', inset: 0 }}
@@ -173,14 +173,15 @@ export default function KeyCanvas({
           metal, so a warm key light + fill + a fuller warm environment keep the
           camera-facing faces and the incised initial alive through the turn (no
           dead-black silhouette), while the dark surround holds the mood. */}
-      <ambientLight intensity={0.45} color="#f0d9a0" />
+      <ambientLight intensity={0.58} color="#f0d9a0" />
       {/* main warm key light, upper-front — gives the faces and engraving form */}
       <directionalLight position={[3, 4, 4]} intensity={1.6} color={PALETTE.brassWarm} />
-      {/* the backlight — warm, behind the key: a SOFT halo, not a harsh hotspot */}
-      <directionalLight position={[0, 2, -5]} intensity={1.9} color="#e8c879" />
+      {/* the backlight — warm, behind the key: tamed to ONE soft halo (was 1.9; the
+          hot rim was overpowering the faces and flattening them to silhouette) */}
+      <directionalLight position={[0, 2, -5]} intensity={1.45} color="#e8c879" />
       {/* warm front fill so the bow face + incised disc read as warm metal, not a
-          black pool, as the disc rotates toward camera */}
-      <directionalLight position={[0, 1, 6]} intensity={0.85} color={PALETTE.brassWarm} />
+          black pool, as the disc rotates toward camera (lifted 0.85 -> 1.1) */}
+      <directionalLight position={[0, 1, 6]} intensity={1.1} color={PALETTE.brassWarm} />
       {/* cool rim from behind-left to separate the silhouette from the near-black */}
       <directionalLight position={[-5, 2, -3]} intensity={0.55} color={PALETTE.rimCool} />
 
@@ -189,19 +190,22 @@ export default function KeyCanvas({
           room, not black gaps) with one contained warm panel behind for the
           backlit edge + a thin streak that sweeps as it turns. */}
       <Environment resolution={256}>
-        {/* broad warm-dark surround — continuous warm light for the metal to
-            reflect, so faces never collapse to black */}
+        {/* broad warm-dark surround — the metal reflects THIS across its faces, so
+            it must be a fuller, warmer field or the brass reads as a black
+            silhouette (aged brass is defined by what it reflects, not diffuse
+            light). Lifted 0.7 -> 1.2 and warmed so the faces stay dimensional. */}
         <Lightformer
           form="rect"
-          intensity={0.7}
-          color="#6b5230"
+          intensity={1.2}
+          color="#7a5c33"
           position={[0, 0, -6]}
           scale={[16, 16, 1]}
         />
-        {/* contained warm panel behind the key — the soft backlight it rims off */}
+        {/* contained warm panel behind the key — the soft backlight it rims off
+            (eased 1.8 -> 1.5 so it's one soft source, not a blowing hotspot) */}
         <Lightformer
           form="rect"
-          intensity={1.8}
+          intensity={1.5}
           color="#e8c879"
           position={[0, 2, -4]}
           scale={[4, 5, 1]}
@@ -223,10 +227,11 @@ export default function KeyCanvas({
           scale={[4, 4, 1]}
         />
         {/* a broad warm panel on the camera side so the bow face + incised disc
-            reflect continuous warm light head-on instead of a dead black pool */}
+            reflect continuous warm light head-on instead of a dead black pool
+            (lifted 0.85 -> 1.2 for a fuller head-on reflection) */}
         <Lightformer
           form="rect"
-          intensity={0.85}
+          intensity={1.2}
           color={PALETTE.brassWarm}
           position={[0, 1, 7]}
           scale={[12, 12, 1]}

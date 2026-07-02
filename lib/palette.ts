@@ -48,7 +48,7 @@ export const ROOM_BG = {
   anteroom: '#19120b',
   hearth: '#251a10',
   quiet: '#322617',
-  ajar: '#8f7a5a', // The Room Not Yet Built — the mid, door-ajar tone
+  ajar: '#b89b68', // The Room Not Yet Built — a warm honey-brass mid (door ajar: light arriving as brass, not grey taupe)
   book: '#f3f1ea',
 } as const;
 

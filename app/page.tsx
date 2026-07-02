@@ -1,4 +1,5 @@
 import { SiteHeader } from '@/components/ui/SiteHeader';
+import { AmbientAudio } from '@/components/ui/AmbientAudio';
 import { Scene } from '@/components/three/Scene';
 import { KeyReveal } from '@/components/three/KeyReveal';
 import { Hero } from '@/components/sections/Hero';
@@ -37,6 +38,7 @@ export default function Page() {
       <KeyReveal />
 
       <SiteHeader />
+      <AmbientAudio />
       <main>
         <Hero />
         <TheIdea />

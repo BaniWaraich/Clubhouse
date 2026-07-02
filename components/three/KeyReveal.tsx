@@ -66,6 +66,16 @@ export function KeyReveal() {
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [reduce, setReduce] = useState(false);
   const [done, setDone] = useState(false);
+  // Whether the entrance is anywhere near the viewport. Once scrolled well past
+  // the key track, the canvas's render loop is PAUSED (frameloop:'demand') so it
+  // stops consuming frames deep in the page — but it stays mounted, so there is
+  // no dispose (and no spurious context-loss); it resumes if the visitor scrolls
+  // back up.
+  const [active, setActive] = useState(true);
+  // Genuine WebGL context loss → overlay the designed poster. Kept SEPARATE from
+  // `webgl` so it never collapses the #key-track / changes document height (a
+  // mid-scroll height change clamps the scroll position to the new bottom).
+  const [lost, setLost] = useState(false);
 
   const hintRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +102,27 @@ export function KeyReveal() {
   // reachable with native scroll; the stage shows a static composed frame/poster
   // and is non-interactive so it never traps the page.
   const scrubbed = mounted && webgl === true && !reduce;
+
+  // Pause the canvas's render loop once the entrance is well offscreen (perf:
+  // pause when the hero is gone — spec §5). The key track is 320vh; give a
+  // one-viewport buffer so it idles only after the threshold has scrolled away.
+  // The canvas stays MOUNTED (we only flip frameloop), so the document height is
+  // never touched and the scroll position is never disturbed.
+  useEffect(() => {
+    if (!scrubbed) return;
+    const onScroll = () => {
+      const past = window.scrollY > window.innerHeight * 4.2;
+      setActive((prev) => (prev === !past ? prev : !past));
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [scrubbed]);
+
+  // Genuine WebGL context loss → overlay the designed poster over the dead canvas.
+  // Does NOT touch `webgl`/`scrubbed`, so the #key-track keeps its height and the
+  // page never shrinks under the visitor.
+  const onContextLost = () => setLost(true);
 
   // The #key-track jumps from 0 → 320vh once `scrubbed` resolves, shifting every
   // section down. ScrollTrigger computed all body trigger points (the spine and
@@ -129,11 +160,18 @@ export function KeyReveal() {
         }}
       >
         {scrubbed ? (
-          <KeyCanvas
-            initial={BRAND.name.charAt(0)}
-            paused={false}
-            onProgress={onProgress}
-          />
+          <>
+            <KeyCanvas
+              initial={BRAND.name.charAt(0)}
+              paused={false}
+              active={active}
+              onProgress={onProgress}
+              onContextLost={onContextLost}
+            />
+            {/* genuine context loss → designed poster over the dead canvas; the
+                track height is untouched so the page never shrinks/jumps */}
+            {lost && <KeyFallback />}
+          </>
         ) : (
           <KeyFallback />
         )}
