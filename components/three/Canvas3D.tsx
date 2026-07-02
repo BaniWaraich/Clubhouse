@@ -5,6 +5,7 @@ import { PerformanceMonitor } from '@react-three/drei';
 import { useEffect, useState } from 'react';
 import { Atmosphere } from './Atmosphere';
 import { GradedBackdrop } from './Scene';
+import { ATMOSPHERE_ACTIVE_AFTER_VH } from '@/lib/scene';
 
 /**
  * The R3F canvas for "the warm room". No object, no studio HDRI — this is
@@ -39,7 +40,8 @@ export default function Canvas3D() {
     if (reduce) return;
     const update = () => {
       const onstage =
-        window.scrollY > window.innerHeight * 2.8 && !document.hidden;
+        window.scrollY > window.innerHeight * ATMOSPHERE_ACTIVE_AFTER_VH &&
+        !document.hidden;
       setActive((prev) => (prev === onstage ? prev : onstage));
     };
     update();

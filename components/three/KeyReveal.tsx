@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { BRAND } from '@/lib/brand';
 import { ScrollTrigger, prefersReducedMotion } from '@/lib/gsap';
+import { KEY_TRACK_VH, KEY_IDLE_AFTER_VH } from '@/lib/scene';
+import { hasWebGL } from '@/lib/webgl';
 
 /**
  * The site's ENTRANCE: a scroll-scrubbed brass-key reveal that plays over a
@@ -47,18 +49,6 @@ function KeyFallback() {
       }}
     />
   );
-}
-
-function hasWebGL(): boolean {
-  try {
-    const canvas = document.createElement('canvas');
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-    );
-  } catch {
-    return false;
-  }
 }
 
 export function KeyReveal() {
@@ -111,7 +101,7 @@ export function KeyReveal() {
   useEffect(() => {
     if (!scrubbed) return;
     const onScroll = () => {
-      const past = window.scrollY > window.innerHeight * 4.2;
+      const past = window.scrollY > window.innerHeight * KEY_IDLE_AFTER_VH;
       setActive((prev) => (prev === !past ? prev : !past));
     };
     onScroll();
@@ -194,7 +184,7 @@ export function KeyReveal() {
       <div
         id="key-track"
         aria-hidden
-        style={{ height: scrubbed ? '320vh' : 0 }}
+        style={{ height: scrubbed ? `${KEY_TRACK_VH}vh` : 0 }}
       />
     </>
   );

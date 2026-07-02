@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import { hasWebGL } from '@/lib/webgl';
 
 /**
  * WebGL must not block first paint and must not run on the server.
@@ -32,18 +33,6 @@ export function GradedBackdrop() {
       }}
     />
   );
-}
-
-function hasWebGL(): boolean {
-  try {
-    const canvas = document.createElement('canvas');
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
-    );
-  } catch {
-    return false;
-  }
 }
 
 export function Scene() {
