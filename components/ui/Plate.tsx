@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 /**
  * Plate — a treated media plate for the editorial chapters.
  *
@@ -15,7 +17,7 @@
 type PlateProps = {
   variant: 'light' | 'shaft' | 'shadow' | 'air'; // gradient mood per chapter
   ratio?: 'portrait' | 'square' | 'landscape' | 'wide'; // aspect-ratio
-  src?: string; // unused in Phase 1; reserved for Phase 2 next/image
+  src?: string; // when set, rendered via next/image into .plate__media
   alt?: string; // decorative by default ('')
   className?: string;
   bleed?: boolean; // true = full-bleed (only TheClubToCome uses this)
@@ -42,12 +44,20 @@ export function Plate({
 
   return (
     <figure className={classes} aria-hidden={!alt}>
-      {/* Phase 2: this becomes next/image, behind the treatment. The raw <img>
-          is never rendered in Phase 1 (src is always undefined); the lint rule
-          is disabled here so the forward-compatible slot can stay in place. */}
+      {/* next/image behind the treatment: responsive, modern-format (AVIF/WebP),
+          lazy by default. `fill` needs the positioned, sized .plate aspect-ratio
+          box as its ancestor (position:relative) so there is no CLS. Left lazy —
+          plates sit below the 320vh key-track, so none is the LCP element. The
+          .plate__media CSS (feather mask, cover) still lies under .plate__treatment. */}
       {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img className="plate__media" src={src} alt={alt} />
+        <Image
+          className="plate__media"
+          src={src}
+          alt={alt}
+          fill
+          sizes="(min-width: 60rem) 40vw, 90vw"
+          style={{ objectFit: 'cover' }}
+        />
       ) : null}
       <div className="plate__treatment" />
       <div className="plate__grain" />
