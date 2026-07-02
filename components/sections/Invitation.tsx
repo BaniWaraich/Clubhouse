@@ -9,11 +9,13 @@ type Fields = {
   email: string;
   referral: string;
   message: string;
+  /** honeypot — hidden decoy; must stay empty for real humans */
+  company: string;
 };
 
 type Errors = Partial<Record<keyof Fields, string>>;
 
-const EMPTY: Fields = { name: '', email: '', referral: '', message: '' };
+const EMPTY: Fields = { name: '', email: '', referral: '', message: '', company: '' };
 
 function validate(values: Fields): Errors {
   const errors: Errors = {};
@@ -161,6 +163,34 @@ export function Invitation() {
                 rows={2}
                 value={values.message}
                 onChange={update('message')}
+              />
+            </div>
+
+            {/* Honeypot: hidden from humans + assistive tech; bots that fill
+                it are silently dropped server-side. Not a real field. */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                padding: 0,
+                margin: -1,
+                overflow: 'hidden',
+                clip: 'rect(0 0 0 0)',
+                whiteSpace: 'nowrap',
+                border: 0,
+              }}
+            >
+              <label htmlFor="company">Company</label>
+              <input
+                id="company"
+                name="company"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={values.company}
+                onChange={update('company')}
               />
             </div>
 
