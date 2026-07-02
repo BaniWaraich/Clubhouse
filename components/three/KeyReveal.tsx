@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
-import { BRAND } from '@/lib/brand';
 import { ScrollTrigger, prefersReducedMotion } from '@/lib/gsap';
 import { KEY_TRACK_VH, KEY_IDLE_AFTER_VH } from '@/lib/scene';
 import { hasWebGL } from '@/lib/webgl';
@@ -152,7 +151,6 @@ export function KeyReveal() {
         {scrubbed ? (
           <>
             <KeyCanvas
-              initial={BRAND.name.charAt(0)}
               paused={false}
               active={active}
               onProgress={onProgress}
