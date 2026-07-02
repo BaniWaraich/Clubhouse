@@ -126,17 +126,26 @@ export default function KeyCanvas({
   initial,
   paused,
   onProgress,
+  onContextLost,
+  active = true,
 }: {
   initial: string;
   paused: boolean;
   onProgress: (p: number) => void;
+  onContextLost?: () => void;
+  /** Pause the render loop (frameloop:'demand') when the hero is offscreen — the
+   *  context stays alive so there is no unmount/dispose, only an idle loop. */
+  active?: boolean;
 }) {
-  const [dpr, setDpr] = useState<[number, number] | number>([1, 2]);
+  // dpr ceiling capped at 1.5 (was 2): with a full-screen bloom pass on the key,
+  // rendering at 2x device pixels on a large viewport is fill-rate heavy and was
+  // part of the scroll-frame overrun. 1.5 keeps the brass + incised initial crisp.
+  const [dpr, setDpr] = useState<[number, number] | number>([1, 1.5]);
 
   return (
     <Canvas
       dpr={dpr}
-      frameloop="always"
+      frameloop={active ? 'always' : 'demand'}
       gl={{
         antialias: true,
         alpha: true,
@@ -146,10 +155,17 @@ export default function KeyCanvas({
       }}
       camera={{ position: [0, LOOK_Y, Z_START], fov: 35 }}
       style={{ position: 'absolute', inset: 0 }}
+      onCreated={({ gl }) => {
+        // Context loss → tell the parent to fall back to the designed poster.
+        gl.domElement.addEventListener('webglcontextlost', (e) => {
+          e.preventDefault();
+          onContextLost?.();
+        });
+      }}
     >
       <PerformanceMonitor
         onDecline={() => setDpr(1)}
-        onIncline={() => setDpr([1, 2])}
+        onIncline={() => setDpr([1, 1.5])}
       />
 
       {/* THE ADMITTANCE OPENING (spec §3.1): warm near-black, the key BACKLIT —
@@ -225,7 +241,7 @@ export default function KeyCanvas({
           No DoF (the camera dollies through the key; a fixed focal plane smears
           it). multisampling 4 + dpr [1,2] keep the silhouette and ward edges
           clean through the composer. */}
-      <EffectComposer multisampling={4} enableNormalPass={false}>
+      <EffectComposer multisampling={2} enableNormalPass={false}>
         <Bloom
           intensity={0.22}
           luminanceThreshold={0.9}

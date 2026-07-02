@@ -81,7 +81,7 @@ const hazeFragment = /* glsl */ `
 
 function Haze({ paused }: { paused: boolean }) {
   const mat = useRef<ShaderMaterial>(null);
-  const { size, invalidate } = useThree();
+  const { size } = useThree();
   const target = useRef({ scroll: 0 });
 
   const uniforms = useMemo(
@@ -111,9 +111,10 @@ function Haze({ paused }: { paused: boolean }) {
     if (!mat.current) return;
     mat.current.uniforms.uAspect.value = size.width / size.height;
     if (paused) {
-      // render a single static, well-composed frame
+      // hold a single static, well-composed frame. No self-invalidate: in
+      // 'demand' mode (idle / reduced-motion) the canvas renders once and then
+      // truly stops, instead of self-scheduling a permanent render loop.
       mat.current.uniforms.uScroll.value = 0.12;
-      invalidate();
       return;
     }
     mat.current.uniforms.uTime.value += delta;
